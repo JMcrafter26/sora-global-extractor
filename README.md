@@ -10,11 +10,12 @@ This is a collection of tools to extract stream URLs from various streaming serv
 
 ## Available Extractors
 
-| Extractor | Description | Author | Async |
-| --- | --- | --- | --- |
-| [turbovid](./extractors/turbovid.js) | Extracts stream URLs from turbovid | [JMcrafter26](https://github.com/JMcrafter26) | ✅ |
-| [voe](./extractors/voe.js) | Extracts stream URLs from voe | [Hamzo](https://github.com/hamzenis) | ✅ |
-| [bigwarp](./extractors/bigwarp.js) | Extracts stream URLs from bigwarp | [JMcrafter26](https://github.com/JMcrafter26) | ✅ |
+| Extractor | Author | Async |
+| --- | --- | --- |
+| [turbovid](./extractors/turbovid.js) | [JMcrafter26](https://github.com/JMcrafter26) | ✅ |
+| [voe](./extractors/voe.js) | [Hamzo](https://github.com/hamzenis) | ✅ |
+| [bigwarp](./extractors/bigwarp.js) | [JMcrafter26](https://github.com/JMcrafter26) | ✅ |
+| [streamwish](./extractors/streamwish.js) | [50/50](https://github.com/50n50) | ✅ |
 
 ## Example Usage
 
