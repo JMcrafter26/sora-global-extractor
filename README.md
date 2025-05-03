@@ -4,6 +4,7 @@ This is a collection of tools to extract stream URLs from various streaming serv
 
 - [Stream URL Extractor Collection](#stream-url-extractor-collection)
   - [Available Extractors](#available-extractors)
+  - [Global Extractor](#global-extractor)
   - [Example Usage](#example-usage)
   - [License](#license)
 
@@ -18,6 +19,12 @@ This is a collection of tools to extract stream URLs from various streaming serv
 | [streamwish](./extractors/streamwish.js) | [50/50](https://github.com/50n50) | ✅ |
 | [SpeedFiles](./extractors/speedfiles.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
 | [Vidmoly](./extractors/vidmoly.js) | [Ibro](https://github.com/xibrox) | ✅ |
+
+## Global Extractor
+
+The global extractor is a function that can be used to extract stream URLs from any of the available extractors.
+
+You can find the global extractor [here](./global-extractor/output/global_extractor.js).
 
 
 ## Example Usage

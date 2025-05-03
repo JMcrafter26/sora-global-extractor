@@ -141,4 +141,6 @@ test();
 //                 EXTRACTORS                 //
 ////////////////////////////////////////////////
 
+// DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING //
+
 /* {EXTRACTOR_FUNCTIONS} */
