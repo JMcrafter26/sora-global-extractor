@@ -5,7 +5,7 @@ async function extractStreamUrl(url) {
 
     let streamUrl = null;
     try {
-      streamUrl = await bigWarpExtract(html);
+      streamUrl = await bigwarpExtractor(html);
     } catch (error) {
       console.log("BigWarp HD extraction error:", error);
     }
@@ -24,7 +24,15 @@ async function extractStreamUrl(url) {
   }
 }
 
-async function bigWarpExtract(html) {
+/* SCHEME START */
+
+/**
+ * 
+ * @name bigWarpExtractor
+ * @author Cufiy
+ */
+
+async function bigwarpExtractor(html) {
   console.log("BigWarp HD extraction method");
   const bwRegex =
     /<ul class="currentStreamLinks"[\s\S]*?<p class="hostName">BigWarp HD<\/p>[\s\S]*?<a[^>]+class="button rb iconPlay"[^>]+href="([^"]+)"[^>]*>/;
@@ -48,3 +56,5 @@ async function bigWarpExtract(html) {
   console.log("BigWarp HD Decoded:", bwDecoded);
   return bwDecoded;
 }
+
+/* SCHEME END */

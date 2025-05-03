@@ -24,6 +24,13 @@ async function extractStreamUrl(url) {
   }
 }
 
+/* SCHEME START */
+
+/**
+ * @name speedfilesExtractor
+ * @author Cufiy
+ */
+
 function speedfilesExtractor(sourcePageHtml) {
   // get var _0x5opu234 = "THIS_IS_AN_ENCODED_STRING"
   const REGEX = /var\s+_0x5opu234\s*=\s*"([^"]+)"/;
@@ -85,3 +92,5 @@ function speedfilesExtractor(sourcePageHtml) {
   let decodedUrl = atob(step9);
   return decodedUrl;
 }
+
+/* SCHEME END */

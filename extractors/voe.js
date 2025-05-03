@@ -24,7 +24,6 @@ async function extractStreamUrl(url) {
   }
 }
 
-// Run voeExtractor(result_of_fetch().text())
 
 /**
  * Extracts a JSON object from the given source page by finding the

@@ -24,6 +24,13 @@ async function extractStreamUrl(url) {
   }
 }
 
+/* SCHEME START */
+
+/**
+ * @name vidmolyExtractor
+ * @author Ibro
+ */
+
 async function vidmolyExtractor(html) {
   const regexSub = /<option value="([^"]+)"[^>]*>\s*SUB - Omega\s*<\/option>/;
   const regexFallback = /<option value="([^"]+)"[^>]*>\s*Omega\s*<\/option>/;
@@ -62,3 +69,5 @@ async function vidmolyExtractor(html) {
     return sourcesString;
   }
 }
+
+/* SCHEME END */
