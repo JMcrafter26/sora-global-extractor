@@ -12,10 +12,13 @@ This is a collection of tools to extract stream URLs from various streaming serv
 
 | Extractor | Author | Async |
 | --- | --- | --- |
-| [turbovid](./extractors/turbovid.js) | [JMcrafter26](https://github.com/JMcrafter26) | ✅ |
+| [turbovid](./extractors/turbovid.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
 | [voe](./extractors/voe.js) | [ShadeOfChaos](https://github.com/ShadeOfChaos) | ✅ |
-| [bigwarp](./extractors/bigwarp.js) | [JMcrafter26](https://github.com/JMcrafter26) | ✅ |
+| [bigwarp](./extractors/bigwarp.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
 | [streamwish](./extractors/streamwish.js) | [50/50](https://github.com/50n50) | ✅ |
+| [SpeedFiles](./extractors/speedfiles.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
+| [Vidmoly] | (./extractors/vidmoly.js) | [Ibro](https://github.com/xibrox) | ✅ |
+
 
 ## Example Usage
 
