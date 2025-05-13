@@ -30,7 +30,7 @@ async function extractStreamUrl(url) {
  * @author Cufiy
  */
 
-async function turbovidExtractor(html) {
+async function turbovidExtractor(html, url = null) {
   const base64EmbedUrl = html.match(/main_origin = "([^"]+)"/)[1];
   const embedUrl = atob(base64EmbedUrl);
 

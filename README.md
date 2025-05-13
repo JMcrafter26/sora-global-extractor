@@ -19,6 +19,7 @@ This is a collection of tools to extract stream URLs from various streaming serv
 | [streamwish](./extractors/streamwish.js) | [50/50](https://github.com/50n50) | ✅ |
 | [SpeedFiles](./extractors/speedfiles.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
 | [Vidmoly](./extractors/vidmoly.js) | [Ibro](https://github.com/xibrox) | ✅ |
+| [DoodStream](./extractors/doodstream.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
 
 ## Global Extractor
 

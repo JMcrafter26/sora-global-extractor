@@ -33,7 +33,7 @@ async function extractStreamUrl(url) {
  * @returns {object|null} The extracted JSON object if successful,
  *   otherwise null.
  */
-function voeExtractor(sourcePageHtml) {
+function voeExtractor(sourcePageHtml, url = null) {
     const REGEX = /MKGMa="([\s\S]+?)"/;
 
     const match = sourcePageHtml.match(REGEX);

@@ -111,15 +111,28 @@ def build_global_extractor(functions):
         provider_cases = ''
         for function in functions:
             provider_cases += '    case "' + function + '":\n'
-            provider_cases += '      return await ' + function + 'Extractor(html);\n'
+            provider_cases += '      return await ' + function + 'Extractor(html, url);\n'
         content = content.replace('/* {PROVIDER_CASES} */', provider_cases)
 
+        # get test/test_providers.txt
+        # check if the file exists
+        if not os.path.exists(os.path.join(script_dir, 'test', 'test_providers.txt')):
+            print('test/test_providers.txt not found. Skipping test providers.')
+        else:
+            with open(os.path.join(script_dir, 'test', 'test_providers.txt'), 'r') as f:
+                test_providers = f.read().splitlines();
+            
+            # replace the /* {TEST_PROVIDERS} */ with the test providers, line by line
+            test_providers_content = ''
+            for provider in test_providers:
+                test_providers_content += provider + '\n'
+            content = content.replace('/* {TEST_PROVIDERS} */', test_providers_content)
 
         # save file to test/global_extractor_test.js
         with open(os.path.join(script_dir, 'test', 'global_extractor_test.js'), 'w') as f:
             f.write(content)
 
-        # remove TESR SCHEME (/* TEST SCHEME START */)
+        # remove TEST SCHEME (/* TEST SCHEME START */)
         start = content.find('/* TEST SCHEME START */')
         end = content.find('/* TEST SCHEME END */')
         if start != -1 and end != -1:

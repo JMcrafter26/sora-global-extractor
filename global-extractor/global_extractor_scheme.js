@@ -75,17 +75,21 @@ async function extractStreamUrlByProvider(url, provider) {
 ////////////////////////////////////////////////
 
 async function test() {
-  console.log("Global extractor test");
+  const startTime = Date.now();
+  console.log("\n\n\x1b[1m\x1b[33mTesting...\x1b[0m\n\n");
   const providers = {
-    "https://speedfiles.net/40d98c5ccf9c": "speedfiles",
-    "https://vidmoly.to/embed-preghvoyp42m.html": "vidmoly",
-    "https://turbovid.eu/embed/ZhkbFoEBXfJu": "turbovid",
-    "https://bigwarp.io/2403850bcotp": "bigwarp",
+  /* {TEST_PROVIDERS} */
   };
+
+  if (Object.keys(providers).length === 0) {
+    console.error("\x1b[31mNo providers found for testing\x1b[0m");
+    console.error("\x1b[31mPlease add providers to the test list\x1b[0m");
+    return;
+  }
 
   let streamUrls = [];
   let i = 0;
-  // seperate test for each provider
+  // separate test for each provider
   for (const [url, provider] of Object.entries(providers)) {
     i++;
     try {
@@ -112,25 +116,45 @@ async function test() {
     }
   }
 
-  console.log("\n\nTest results:");
-  streamUrls.forEach((item) => {
-    console.log(`${item.provider}: ${item.streamUrl}`);
-  });
+  // print the number of tests
+  console.log(`\n\n\x1b[1m\x1b[33m${i} tests completed\x1b[0m`);
 
 
   // check if all streamUrls are valid and so the tests are successful
-  const allValid = streamUrls.every((item) => item.streamUrl !== null);
-  if (allValid) {
+  // count the number of valid streamUrls
+  let validCount = 0;
+  streamUrls.forEach((item) => {
+    if (item.streamUrl && item.streamUrl.startsWith("http")) {
+      validCount++;
+    }
+  });
+  if (validCount === streamUrls.length) {
     // all tests passed in bold and green
-    console.log("\x1b[32m\x1b[1mAll tests passed\x1b[0m");
+    console.log(`\x1b[32m\x1b[1mAll tests passed successfully in ${((Date.now() - startTime) / 1000).toFixed(2)} seconds\x1b[0m\n`);
   } else {
-    console.log("\x1b[31m\x1b[1mSome tests failed\x1b[0m");
-    streamUrls.forEach((item) => {
-      if (item.streamUrl === null) {
-        console.log(`Failed for ${item.provider}: ${item.url}`);
-      }
-    });
+    console.log(`\x1b[31m\x1b[1m${validCount} out of ${streamUrls.length} tests passed in ${((Date.now() - startTime) / 1000).toFixed(2)} seconds\x1b[0m\n`);
   }
+
+      streamUrls.forEach((item) => {
+        if (
+          item.streamUrl === null ||
+          !item.streamUrl ||
+          !item.streamUrl.startsWith("http")
+        ) {
+          console.log(
+            `${item.provider}: ${item.url} - \x1b[31m\x1b[1mTest failed\x1b[0m`
+          );
+        } else {
+          console.log(
+            `${item.provider}: ${item.url} - \x1b[32m\x1b[1mTest passed\x1b[0m`
+          );
+        }
+      });
+
+    console.log("\n\x1b[1m\x1b[33mStream URLs:\x1b[0m");
+  streamUrls.forEach((item) => {
+    console.log(`${item.provider}: ${item.streamUrl}`);
+  });
 
 }
 test();

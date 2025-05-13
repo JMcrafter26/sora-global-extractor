@@ -7,7 +7,7 @@ set script_dir=%~dp0
 @REM run ../build.py
 python %script_dir%..\build.py
 
-cls
+@REM cls
 
 set script="%~dp0global_extractor_test.js"
 

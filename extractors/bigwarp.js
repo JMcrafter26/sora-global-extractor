@@ -32,25 +32,12 @@ async function extractStreamUrl(url) {
  * @author Cufiy
  */
 
-async function bigwarpExtractor(html) {
-  console.log("BigWarp HD extraction method");
-  const bwRegex =
-    /<ul class="currentStreamLinks"[\s\S]*?<p class="hostName">BigWarp HD<\/p>[\s\S]*?<a[^>]+class="button rb iconPlay"[^>]+href="([^"]+)"[^>]*>/;
-  const bwMatch = bwRegex.exec(html);
+async function bigwarpExtractor(videoPage, url = null) {
 
-  if (!bwMatch || !bwMatch[1]) {
-    console.log("BigWarp HD stream URL not found");
-    return false;
-  }
 
-  let bwUrl = bwMatch[1];
-
-  console.log("BigWarp URL:", bwUrl);
-
-  const videoPage = await fetch(bwUrl);
-
-  const scriptRegex =
-    /jwplayer\("vplayer"\)\.setup\(\{[\s\S]*?sources:\s*\[\{file:"([^"]+)",label:"[^"]+"\}\]/;
+  // regex get 'sources: [{file:"THIS_IS_THE_URL" ... '
+  const scriptRegex = /sources:\s*\[\{file:"([^"]+)"/;
+  // const scriptRegex =
   const scriptMatch = scriptRegex.exec(videoPage);
   const bwDecoded = scriptMatch ? scriptMatch[1] : false;
   console.log("BigWarp HD Decoded:", bwDecoded);

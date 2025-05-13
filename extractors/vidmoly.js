@@ -31,7 +31,7 @@ async function extractStreamUrl(url) {
  * @author Ibro
  */
 
-async function vidmolyExtractor(html) {
+async function vidmolyExtractor(html, url = null) {
   const regexSub = /<option value="([^"]+)"[^>]*>\s*SUB - Omega\s*<\/option>/;
   const regexFallback = /<option value="([^"]+)"[^>]*>\s*Omega\s*<\/option>/;
   const fallback =
