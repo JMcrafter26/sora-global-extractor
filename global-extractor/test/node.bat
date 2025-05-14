@@ -4,12 +4,10 @@ REM This script is used to run the node.js tests for the global-extractor projec
 :: get script directory
 set script_dir=%~dp0
 
-@REM run ../build.py
-python %script_dir%..\build.py
-
-@REM cls
-
 set script="%~dp0global_extractor_test.js"
+
+echo "Use build.py to build and test the project."
+timeout /t 5 >nul
 
 @REM run node.js tests
 node %script% %*

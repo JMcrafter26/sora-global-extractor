@@ -5,6 +5,7 @@ This is a collection of tools to extract stream URLs from various streaming serv
 - [Stream URL Extractor Collection](#stream-url-extractor-collection)
   - [Available Extractors](#available-extractors)
   - [Global Extractor](#global-extractor)
+    - [Supported Extractors](#supported-extractors)
   - [Example Usage](#example-usage)
   - [License](#license)
 
@@ -26,6 +27,26 @@ This is a collection of tools to extract stream URLs from various streaming serv
 The global extractor is a function that can be used to extract stream URLs from any of the available extractors.
 
 You can find the global extractor [here](./global-extractor/output/global_extractor.js).
+
+### Supported Extractors
+
+
+
+
+
+
+
+
+
+<!-- EXTRACTORS_TABLE_START -->
+| Extractor | Test Passed |
+| -------- | ------- |
+| speedfiles | ✅ |
+| vidmoly | ✅ |
+| filemoon | ❌ |
+| doodstream | ❌ |
+| voe | ✅ |
+<!-- EXTRACTORS_TABLE_END -->
 
 
 ## Example Usage

@@ -170,18 +170,69 @@ def build():
     build_global_extractor(functions)
     
 
+def test():
+    print('Testing global extractor...')
+    # run test/global_extractor_test.js with node and wait for test/test_results.json (timeout 20s)
+    os.system('node ' + os.path.join(script_dir, 'test', 'global_extractor_test.js'))
+    # wait for the file to be created
+    timeout = 20
+    start_time = time.time()
+    while not os.path.exists(os.path.join(script_dir, 'test', 'test_results.json')):
+        if time.time() - start_time > timeout:
+            print('Timeout waiting for test results.')
+            return
+        time.sleep(1)
+    # read the test results
 
+# {
+#   "speedfiles": "passed",
+#   "vidmoly": "passed",
+#   "filemoon": "failed",
+#   "doodstream": "failed",
+#   "voe": "passed"
+# }
+
+
+    new_table_content = '<!-- EXTRACTORS_TABLE_START -->\n'
+    new_table_content += '| Extractor | Test Passed |\n'
+    new_table_content += '| -------- | ------- |\n'
+    with open(os.path.join(script_dir, 'test', 'test_results.json'), 'r') as f:
+        test_results = json.load(f)
+        # based on the test results, update the md table in __file__  '/..' + '/README.md', where <!-- EXTRACTORS_TABLE_START -->
+        # and <!-- EXTRACTORS_TABLE_END --> are
+
+        for provider, result in test_results.items():
+            # use emojis for the results
+            if result == 'passed':
+                new_table_content += '| ' + provider + ' | ✅ |\n'
+            else:
+                new_table_content += '| ' + provider + ' | ❌ |\n'
     
-        
-
-
-
-    
-
+    # read the README.md file
+    with open(os.path.join(script_dir, '..', 'README.md'), 'r', encoding='utf-8') as f:
+        readme_content = f.read()
+        # find the start and end of the table
+        start = readme_content.find('<!-- EXTRACTORS_TABLE_START -->')
+        end = readme_content.find('<!-- EXTRACTORS_TABLE_END -->')
+        if start == -1 or end == -1:
+            print('Error: Table not found in README.md')
+            return
+        # replace the table with the new table
+        new_table_content = readme_content[:start] + '\n' + new_table_content + readme_content[end:]
+        # write the file
+        with open(os.path.join(script_dir, '..', 'README.md'), 'w', encoding='utf-8') as f:
+            f.write(new_table_content)
+            print('README.md updated successfully.')
 
 
 
 if __name__ == "__main__":
     # build the extractors
+    startTime = time.time()
     build()
     print("Extractors built successfully.")
+
+    test()
+    print("Test completed successfully.")
+    endTime = time.time()
+    print("Total time taken: " + str(endTime - startTime) + " seconds.")

@@ -156,6 +156,25 @@ async function test() {
     console.log(`${item.provider}: ${item.streamUrl}`);
   });
 
+  // make an array of the extractors and their test results
+  const extractors = {};
+  streamUrls.forEach((item) => {
+    if (item.streamUrl && item.streamUrl.startsWith("http")) {
+      extractors[item.provider] = "passed";
+    } else {
+      extractors[item.provider] = "failed";
+    }
+  });
+  
+  // node only, save the test results to a file
+  if (typeof process !== "undefined" && process.versions && process.versions.node) {
+    const fs = require("fs");
+    const path = require("path");
+    const filePath = path.join(__dirname, "test_results.json");
+    fs.writeFileSync(filePath, JSON.stringify(extractors, null, 2));
+    console.log(`\n\x1b[1m\x1b[33mTest results saved to ${filePath}\x1b[0m`);
+  }
+
 }
 test();
 

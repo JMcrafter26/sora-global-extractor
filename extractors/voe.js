@@ -43,7 +43,7 @@ async function extractStreamUrl(url) {
  * @author Cufiy
  */
 
-function voeExtractor(html) {
+function voeExtractor(html, url = null) {
 // Extract the first <script type="application/json">...</script>
     const jsonScriptMatch = html.match(
       /<script[^>]+type=["']application\/json["'][^>]*>([\s\S]*?)<\/script>/i
