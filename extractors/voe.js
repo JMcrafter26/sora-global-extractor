@@ -1,22 +1,34 @@
 async function extractStreamUrl(url) {
   try {
     const response = await fetch(url);
-    const html = (await response.text) ? response.text() : response;
+    const html = await response.text();
 
-    let streamUrl = null;
+    
+    let streamData = null;
     try {
-      streamUrl = await voeExtractor(html);
+      streamData = voeExtractor(html);
     } catch (error) {
-      console.log("VOE HD extraction error:", error);
+      console.log("VOE extraction error:", error);
+      return null;
     }
 
-    console.log("Voe Stream URL: " + streamUrl);
-    if (streamUrl && streamUrl !== false && streamUrl !== null) {
-      return streamUrl;
+    // You may want to adjust this depending on the actual structure
+    if (streamData && typeof streamData === "object") {
+      // Try to find a stream URL in the result
+      const streamUrl =
+        streamData.direct_access_url ||
+        streamData.source
+          .map((source) => source.direct_access_url)
+          .find((url) => url && url.startsWith("http"));
+      if (streamUrl) {
+        console.log("Voe Stream URL: " + streamUrl);
+        return streamUrl;
+      }
+      console.log("No stream URL found in the decoded JSON");
+      return null;
     }
 
     console.log("No stream URL found");
-
     return null;
   } catch (error) {
     console.log("Fetch error:", error);
@@ -24,149 +36,114 @@ async function extractStreamUrl(url) {
   }
 }
 
+/* SCHEME START */
 
 /**
- * Extracts a JSON object from the given source page by finding the
- * encoded string marked with the regex /MKGMa="([\s\S]+?)"/ and
- * decoding it using the voeDecoder function.
- * @param {string} sourcePageHtml - The source page to be parsed.
- * @returns {object|null} The extracted JSON object if successful,
- *   otherwise null.
+ * @name voeExtractor
+ * @author Cufiy
  */
-function voeExtractor(sourcePageHtml, url = null) {
-    const REGEX = /MKGMa="([\s\S]+?)"/;
 
-    const match = sourcePageHtml.match(REGEX);
-    if(match == null || match[1] == null) {
-        console.log('Could not extract from Voe source');
-        return null;
-    }
-
-    const encodedString = match[1];
-    const decodedJson = voeDecoder(encodedString);
-    
-    return decodedJson;
-}
-
-/**
- * Decodes the given MKGMa string, which is a custom encoded string used
- * by VOE. This function applies the following steps to the input string to
- * decode it:
- * 1. Apply ROT13 to each alphabetical character in the string.
- * 2. Remove all underscores from the string.
- * 3. Decode the string using the Base64 algorithm.
- * 4. Apply a character shift of 0x3 to each character in the decoded string.
- * 5. Reverse the order of the characters in the shifted string.
- * 6. Decode the reversed string using the Base64 algorithm again.
- * 7. Parse the decoded string as JSON.
- * @param {string} MKGMa_String - The input string to be decoded.
- * @returns {object} The decoded JSON object.
- */
-function voeDecoder(MKGMa_String) {
-    let ROT13String = ROT13(MKGMa_String);
-    let sanitizedString = voeSanitizer(ROT13String);
-    let UnderscoreRemoved = sanitizedString.split('_').join('');
-    let base64DecodedString = atob(UnderscoreRemoved);
-    let charShiftedString = shiftCharacter(base64DecodedString, 0x3);
-    let reversedString = charShiftedString.split('').reverse().join('');
-    let base64DecodedStringAgain = atob(reversedString);
-    let decodedJson;
-    try {
-        decodedJson = JSON.parse(base64DecodedStringAgain);
-    } catch (error) {
-        console.log("JSON parse error:", error);
-        decodedJson = {};
-    }
-    return decodedJson;
-}
-
-/**
- * Encodes a given string using the ROT13 cipher, which shifts each letter
- * 13 places forward in the alphabet. Only alphabetical characters are 
- * transformed; other characters remain unchanged.
- * 
- * @param {string} string - The input string to be encoded.
- * @returns {string} The encoded string with ROT13 applied.
- */
-function ROT13(string) {
-    let ROT13String = '';
-
-    for (let i=0; i < string.length; i++) {
-        let currentCharCode = string.charCodeAt(i);
-
-        // Check for uppercase
-        if (currentCharCode >= 65 && currentCharCode <= 90) {
-            currentCharCode = (currentCharCode - 65 + 13) % 26 + 65;
-        // Check for lowercase
-        } else if (currentCharCode >= 97 && currentCharCode <= 122) {
-            currentCharCode = (currentCharCode - 97 + 13) % 26 + 97;
-        }
-
-        ROT13String += String.fromCharCode(currentCharCode);
-    }
-
-    return ROT13String;
-}
-
-/**
- * Sanitizes a given string by replacing all occurrences of certain "trash" strings
- * with an underscore. The trash strings are '@$', '^^', '~@', '%?', '*~', '!!', '#&'.
- * This is used to decode VOE encoded strings.
- * @param {string} string The string to be sanitized.
- * @returns {string} The sanitized string.
- */
-function voeSanitizer(string) {
-    let sanitizationArray = ['@$', '^^', '~@', '%?', '*~', '!!', '#&'];
-    let tempString = string;
-
-    for (let i=0; i < sanitizationArray.length; i++) {
-        let currentTrash = sanitizationArray[i];
-        let sanitizedString = new RegExp(currentTrash.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), 'g');
-
-        tempString = tempString.replace(sanitizedString, '_');
-    }
-
-    return tempString;
-}
-
-/**
- * Shifts the characters in a string by a given number of places.
- * @param {string} string - The string to shift.
- * @param {number} shiftNum - The number of places to shift the string.
- * @returns {string} The shifted string.
- */
-function shiftCharacter(string, shiftNum) {
-    let tempArray = [];
-
-    for (let i=0; i < string.length; i++) {
-        tempArray.push(String.fromCharCode(string.charCodeAt(i) - shiftNum));
-    }
-    
-    return tempArray.join('');
-}
-
-function base64Decode(str) {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-  let output = "";
-
-  str = String(str).replace(/=+$/, "");
-
-  if (str.length % 4 === 1) {
-    throw new Error(
-      "'atob' failed: The string to be decoded is not correctly encoded."
+function voeExtractor(html) {
+// Extract the first <script type="application/json">...</script>
+    const jsonScriptMatch = html.match(
+      /<script[^>]+type=["']application\/json["'][^>]*>([\s\S]*?)<\/script>/i
     );
-  }
+    if (!jsonScriptMatch) {
+      console.log("No application/json script tag found");
+      return null;
+    }
 
-  for (
-    let bc = 0, bs, buffer, idx = 0;
-    (buffer = str.charAt(idx++));
-    ~buffer && ((bs = bc % 4 ? bs * 64 + buffer : buffer), bc++ % 4)
-      ? (output += String.fromCharCode(255 & (bs >> ((-2 * bc) & 6))))
-      : 0
-  ) {
-    buffer = chars.indexOf(buffer);
-  }
 
-  return output;
+    const obfuscatedJson = jsonScriptMatch[1].trim();
+
+  let data;
+  try {
+    data = JSON.parse(obfuscatedJson);
+  } catch (e) {
+    throw new Error("Invalid JSON input.");
+  }
+  if (!Array.isArray(data) || typeof data[0] !== "string") {
+    throw new Error("Input doesn't match expected format.");
+  }
+  let obfuscatedString = data[0];
+
+  // Step 1: ROT13
+  let step1 = voeRot13(obfuscatedString);
+
+  // Step 2: Remove patterns
+  let step2 = voeRemovePatterns(step1);
+
+  // Step 3: Base64 decode
+  let step3 = voeBase64Decode(step2);
+
+  // Step 4: Subtract 3 from each char code
+  let step4 = voeShiftChars(step3, 3);
+
+  // Step 5: Reverse string
+  let step5 = step4.split("").reverse().join("");
+
+  // Step 6: Base64 decode again
+  let step6 = voeBase64Decode(step5);
+
+  // Step 7: Parse as JSON
+  let result;
+  try {
+    result = JSON.parse(step6);
+  } catch (e) {
+    throw new Error("Final JSON parse error: " + e.message);
+  }
+  console.log("Decoded JSON:", result);
+
+  // check if direct_access_url is set, not null and starts with http
+  if (result && typeof result === "object") {
+    const streamUrl =
+      result.direct_access_url ||
+      result.source
+        .map((source) => source.direct_access_url)
+        .find((url) => url && url.startsWith("http"));
+    if (streamUrl) {
+      console.log("Voe Stream URL: " + streamUrl);
+      return streamUrl;
+    } else {
+      console.log("No stream URL found in the decoded JSON");
+    }
+  }
+  return result;
 }
+
+function voeRot13(str) {
+  return str.replace(/[a-zA-Z]/g, function (c) {
+    return String.fromCharCode(
+      (c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13)
+        ? c
+        : c - 26
+    );
+  });
+}
+
+function voeRemovePatterns(str) {
+  const patterns = ["@$", "^^", "~@", "%?", "*~", "!!", "#&"];
+  let result = str;
+  for (const pat of patterns) {
+    result = result.split(pat).join("");
+  }
+  return result;
+}
+
+function voeBase64Decode(str) {
+  // atob is available in browsers and Node >= 16
+  if (typeof atob === "function") {
+    return atob(str);
+  }
+  // Node.js fallback
+  return Buffer.from(str, "base64").toString("utf-8");
+}
+
+function voeShiftChars(str, shift) {
+  return str
+    .split("")
+    .map((c) => String.fromCharCode(c.charCodeAt(0) - shift))
+    .join("");
+}
+
+/* SCHEME END */
