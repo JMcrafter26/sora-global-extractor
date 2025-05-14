@@ -1,21 +1,24 @@
-MIT License
+Copyright (c) 2025, JMcrafter26
+All rights reserved.
 
-Copyright (c) 2025 John M
+This software module is licensed exclusively for use within the [Sora/Sulfur iOS application](https://github.com/cranci1/Sora), developed by cranc1.  
+Use outside of this context is strictly prohibited.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## LICENSE TERMS:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+### 1. Permitted Use:
+- This software may only be used as part of the official Sora or Sulfur iOS applications.
+- Use is restricted to builds distributed or authorized by cranc1.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+### 2. Prohibited Use:
+- Redistribution, reproduction, or sublicensing in any form is not allowed.
+- Use in any other software, product, service, or platform is strictly prohibited.
+- Commercial use is forbidden under all circumstances.
+- Private or personal use outside of the permitted context is not allowed.
+
+### 3. Access & Agreement:
+- By accessing, downloading, or using any portion of this repository, you acknowledge and agree to abide by these terms.
+- Unauthorized use or distribution may result in legal action.
+
+This license does not grant any rights under patent, trademark, or other intellectual property laws beyond those explicitly stated above.  
+### Note: The license terms may change over time. It is your responsibility to review the latest version periodically.

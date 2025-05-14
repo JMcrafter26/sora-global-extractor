@@ -111,7 +111,12 @@ def build_global_extractor(functions):
         provider_cases = ''
         for function in functions:
             provider_cases += '    case "' + function + '":\n'
-            provider_cases += '      return await ' + function + 'Extractor(html, url);\n'
+            provider_cases += '      try {\n'
+            provider_cases += '         return await ' + function + 'Extractor(html, url);\n'
+            provider_cases += '      } catch (error) {\n'
+            provider_cases += '         console.log("Error extracting stream URL from ' + function + ':", error);\n'
+            provider_cases += '         return null;\n'
+            provider_cases += '      }\n'
         content = content.replace('/* {PROVIDER_CASES} */', provider_cases)
 
         # get test/test_providers.txt
@@ -218,7 +223,7 @@ def test():
             print('Error: Table not found in README.md')
             return
         # replace the table with the new table
-        new_table_content = readme_content[:start] + '\n' + new_table_content + readme_content[end:]
+        new_table_content = readme_content[:start] + new_table_content + readme_content[end:]
         # write the file
         with open(os.path.join(script_dir, '..', 'README.md'), 'w', encoding='utf-8') as f:
             f.write(new_table_content)

@@ -30,13 +30,7 @@ You can find the global extractor [here](./global-extractor/output/global_extrac
 
 ### Supported Extractors
 
-
-
-
-
-
-
-
+The global extractor supports the following extractors:
 
 <!-- EXTRACTORS_TABLE_START -->
 | Extractor | Test Passed |
@@ -64,4 +58,4 @@ You can find these extractors in action in the [Sora Modules Library](https://so
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project has a custom license that allows you to use it only in the Sora/Sulfur iOS application. [See LICENSE](./LICENSE) for more details.
