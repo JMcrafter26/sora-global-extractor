@@ -41,7 +41,8 @@ function globalExtractor(providers) {
   for (const [url, provider] of Object.entries(providers)) {
     try {
       const streamUrl = extractStreamUrlByProvider(url, provider);
-      if (streamUrl) {
+      // check if streamUrl is not null, a string, and starts with http or https
+      if (streamUrl && typeof streamUrl === "string" && (streamUrl.startsWith("http"))) {
         return streamUrl;
       }
     } catch (error) {
@@ -49,6 +50,39 @@ function globalExtractor(providers) {
     }
   }
   return null;
+}
+
+function multiExtractor(providers) {
+  /* this scheme should be returned as a JSON object
+  {
+  "streams": [
+    "FileMoon",
+    "https://filemoon.example/stream1.m3u8",
+    "StreamWish",
+    "https://streamwish.example/stream2.m3u8",
+    "Okru",
+    "https://okru.example/stream3.m3u8",
+    "MP4",
+    "https://mp4upload.example/stream4.mp4",
+    "Default",
+    "https://default.example/stream5.m3u8"
+  ]
+}
+  */
+  const streams = [];
+  for (const [url, provider] of Object.entries(providers)) {
+    try {
+      const streamUrl = extractStreamUrlByProvider(url, provider);
+      // check if streamUrl is not null, a string, and starts with http or https
+      if (streamUrl && typeof streamUrl === "string" && (streamUrl.startsWith("http"))) {
+        streams.push(provider);
+        streams.push(streamUrl);
+      }
+    } catch (error) {
+      // Ignore the error and try the next provider
+    }
+  }
+  return streams;
 }
 
 

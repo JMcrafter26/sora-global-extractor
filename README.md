@@ -37,8 +37,10 @@ The global extractor supports the following extractors:
 | -------- | ------- |
 | speedfiles | ✅ |
 | vidmoly | ✅ |
+| turbovid | ❌ |
+| bigwarp | ❌ |
 | filemoon | ❌ |
-| doodstream | ❌ |
+| doodstream | ✅ |
 | voe | ✅ |
 <!-- EXTRACTORS_TABLE_END -->
 

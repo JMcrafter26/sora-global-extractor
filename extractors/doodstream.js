@@ -36,11 +36,12 @@ async function doodstreamExtractor(html, url = null) {
     console.log("DoodStream extractor called");
     console.log("DoodStream extractor URL: " + url);
         const streamDomain = url.match(/https:\/\/(.*?)\//, url)[0].slice(8, -1);
+        const md5Path = html.match(/'\/pass_md5\/(.*?)',/, url)[0].slice(11, -2);
+
         const token = md5Path.substring(md5Path.lastIndexOf("/") + 1);
         const expiryTimestamp = new Date().valueOf();
-        const randomStr = randomStr(10);
+        const random = randomStr(10);
 
-        const md5Path = html.match(/'\/pass_md5\/(.*?)',/, url)[0].slice(11, -2);
 
 
         const passResponse = await fetch(`https://${streamDomain}/pass_md5/${md5Path}`, {
@@ -50,7 +51,7 @@ async function doodstreamExtractor(html, url = null) {
         });
         console.log("DoodStream extractor response: " + passResponse.status);
         const responseData = await passResponse.text();
-        const videoUrl = `${responseData}${randomStr}?token=${token}&expiry=${expiryTimestamp}`;
+        const videoUrl = `${responseData}${random}?token=${token}&expiry=${expiryTimestamp}`;
         console.log("DoodStream extractor video URL: " + videoUrl);
         return videoUrl;
 }

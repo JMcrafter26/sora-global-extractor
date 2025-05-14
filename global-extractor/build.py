@@ -5,11 +5,11 @@ import json
 # ../extractors/
 extractors_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'extractors')
 script_dir = os.path.dirname(os.path.realpath(__file__))
-extractor_functions = {}
 
-def get_functions():
+def get_functions(allowed_functions=[]):
     # from the extractors directory, get all the files that end with .js
     files = [f for f in os.listdir(extractors_dir) if f.endswith('.js')]
+    extractor_functions = {}
 
     print('Getting functions from files...')
 
@@ -25,6 +25,11 @@ def get_functions():
                 scheme = content[start + len('/* SCHEME START */'):end]
                 # get the function name from the file name
                 function_name = file.split('.')[0]
+                # check if the function name is in the allowed functions list, if the list is empty, it means all functions are allowed
+                if allowed_functions:
+                    if function_name not in allowed_functions:
+                        print('Function ' + function_name + ' is not in the allowed functions list. Skipping...')
+                        continue
                 # add the function to the list
                 extractor_functions[function_name] = scheme
     
@@ -65,7 +70,7 @@ def build_extractors(functions):
             json.dump(functions, json_file, indent=4)
         print('Extractors built successfully.')
 
-def build_global_extractor(functions):
+def build_global_extractor(functions, allowed_functions=[]):
     print('Building global extractor...')
     # get global_extractor_scheme.js
     global_extractor_file = os.path.join(script_dir, 'global_extractor_scheme.js')
@@ -143,17 +148,24 @@ def build_global_extractor(functions):
         if start != -1 and end != -1:
             content = content[:start] + content[end + len('/* TEST SCHEME END */'):]
 
-        # write the file
-        with open(os.path.join(script_dir, 'output', 'global_extractor.js'), 'w') as f:
-            f.write(content)
+        # if allowed_functions is empty:
+        if allowed_functions:
+            with open(os.path.join(script_dir, 'output', 'global_extractor.js'), 'w') as f:
+                f.write(content)
+        else:
+            # save the file to output/global_extractor.js
+            content = '/* WARNING: This file contains all the extractors, working and not working and is not recommended to be used. */\n' + content
+            with open(os.path.join(script_dir, 'output', 'global_extractor_all.js'), 'w') as f:
+                f.write(content)
 
 
 
 
-def build():
+def build(allowed_functions=[]):
+    print(allowed_functions)
     print('Global extractor build started...')
     # get the functions
-    functions = get_functions()
+    functions = get_functions(allowed_functions)
     # create the output directory if it doesn't exist
     if not os.path.exists(os.path.join(script_dir, 'output')):
         os.makedirs(os.path.join(script_dir, 'output'))
@@ -172,8 +184,8 @@ def build():
     #     print('Error building global extractor: ' + str(e))
     #     return
 
-    build_global_extractor(functions)
-    
+    build_global_extractor(functions, allowed_functions=allowed_functions)
+
 
 def test():
     print('Testing global extractor...')
@@ -228,6 +240,8 @@ def test():
         with open(os.path.join(script_dir, '..', 'README.md'), 'w', encoding='utf-8') as f:
             f.write(new_table_content)
             print('README.md updated successfully.')
+    
+    return test_results
 
 
 
@@ -235,9 +249,20 @@ if __name__ == "__main__":
     # build the extractors
     startTime = time.time()
     build()
-    print("Extractors built successfully.")
+    print("Build completed successfully.")
 
-    test()
+    test_results = test()
     print("Test completed successfully.")
+
+    allowed_functions = []
+    # add the passed extractors to the allowed functions
+    for provider, result in test_results.items():
+        if result == 'passed':
+            allowed_functions.append(provider)
+    # build the global extractor again with the allowed functions
+    print('Building global extractor with allowed functions...')
+    build(allowed_functions=allowed_functions)
+
+
     endTime = time.time()
-    print("Total time taken: " + str(endTime - startTime) + " seconds.")
+    print("Total time taken: " + str(round(endTime - startTime, 2)) + " seconds.")
