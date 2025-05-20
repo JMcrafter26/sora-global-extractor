@@ -52,7 +52,7 @@ function globalExtractor(providers) {
   return null;
 }
 
-function multiExtractor(providers) {
+async function multiExtractor(providers) {
   /* this scheme should be returned as a JSON object
   {
   "streams": [
@@ -72,7 +72,7 @@ function multiExtractor(providers) {
   const streams = [];
   for (const [url, provider] of Object.entries(providers)) {
     try {
-      const streamUrl = extractStreamUrlByProvider(url, provider);
+      const streamUrl = await extractStreamUrlByProvider(url, provider);
       // check if streamUrl is not null, a string, and starts with http or https
       if (streamUrl && typeof streamUrl === "string" && (streamUrl.startsWith("http"))) {
         streams.push(provider);
