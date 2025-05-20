@@ -1,3 +1,4 @@
+
 async function extractStreamUrl(url) {
   const language = "eng";
   try {
@@ -31,11 +32,10 @@ async function extractStreamUrl(url) {
  */
 
 async function turbovidExtractor(html, url = null) {
-  const base64EmbedUrl = html.match(/main_origin = "([^"]+)"/)[1];
-  const embedUrl = atob(base64EmbedUrl);
+  const embedUrl = url;
 
   // 1. Extract critical variables from embed page
-  const { mediaType, apKey, xxId } = await extractEmbedVariables(embedUrl);
+  const { mediaType, apKey, xxId } = await extractEmbedVariables(html);
   console.log(
     "mediaType:" + mediaType + " | apKey:" + apKey + " | xxId:" + xxId
   );
@@ -52,19 +52,11 @@ async function turbovidExtractor(html, url = null) {
   const streamUrl = xorDecryptHex(encryptedPayload, juiceKeys.juice);
   console.log("streamUrl: " + streamUrl);
   // 5. Return the final stream URL
-  if (mediaType === "video") {
-    return streamUrl;
-  } else {
-    console.log("Media type is not video");
-    return null;
-  }
+  return streamUrl;
 }
 
 //   HELPERS
-async function extractEmbedVariables(embedUrl) {
-  const response = await fetch(embedUrl);
-  // const html = await response.text();
-  const html = await response;
+async function extractEmbedVariables(html) {
   return {
     mediaType: getJsVarValue(html, "media_type"),
     // posterPath: getJsVarValue(html, 'posterPath'),
@@ -75,17 +67,31 @@ async function extractEmbedVariables(embedUrl) {
   };
 }
 
+function getJsVarValue(html, varName) {
+  const regex = new RegExp(`const ${varName}\\s*=\\s*"([^"]+)`);
+  const match = html.match(regex);
+  return match ? match[1] : null;
+}
+
 async function fetchJuiceKeys(embedUrl) {
-  const headers = `Referer=${embedUrl}|Origin=${embedUrl}`;
+  // console.log("fetchJuiceKeys called with embedUrl:", embedUrl);
+  // const headers = `Referer=${embedUrl}|Origin=${embedUrl}`;
 
   const fetchUrl =
     atob("aHR0cHM6Ly90dXJib3ZpZC5ldS9hcGkvY3Vja2VkLw==") + "juice_key";
+  // const vercelUrl = `https://sora-passthrough.vercel.app/passthrough?url=${fetchUrl}&headers=${headers} }`;
+  // const response = await fetch(vercelUrl);
 
-  const vercelUrl = `https://sora-passthrough.vercel.app/passthrough?url=${fetchUrl}&headers=${headers} }`;
+  const response = await fetch(fetchUrl, {
+    headers: {
+      method: "GET",
+      referer: embedUrl,
+    },
+  });
+  console.log("fetchJuiceKeys response:", response.status);
+  // save entire response to file  
 
-  const response = await fetch(vercelUrl);
-
-  return await JSON.parse(response);
+  return await response.json() || await JSON.parse(response);
 }
 
 async function fetchEncryptedPayload(embedUrl, apKey, xxId) {
@@ -97,12 +103,19 @@ async function fetchEncryptedPayload(embedUrl, apKey, xxId) {
     xxId;
   console.log("url:", url);
 
-  const headers = `Referer=${embedUrl}|Origin=${embedUrl}`;
-  const vercelUrl = `https://sora-passthrough.vercel.app/passthrough?url=${url}&headers=${headers} }`;
+  // const headers = `Referer=${embedUrl}|Origin=${embedUrl}`;
+  // const vercelUrl = `https://sora-passthrough.vercel.app/passthrough?url=${url}&headers=${headers} }`;
+  // const response = await fetch(vercelUrl);
 
-  const response = await fetch(vercelUrl);
+  const response = await fetch(url, {
+    headers: {
+      method: "GET",
+      referer: embedUrl,
+    },
+  });
+  console.log("fetchEncryptedPayload response:", response.status);
 
-  const data = await JSON.parse(response);
+  const data = await response.json() || await JSON.parse(response);
 
   return data.data;
 }

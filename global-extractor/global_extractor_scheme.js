@@ -92,7 +92,30 @@ async function extractStreamUrlByProvider(url, provider) {
   console.log("Fetching URL: " + url);
   const response = await fetch(url);
   console.log("Response: " + response.status);
-  const html = response.text ? await response.text() : response;
+  let html = response.text ? await response.text() : response;
+  // if title contains redirect, then get the redirect url
+  const title = html.match(/<title>(.*?)<\/title>/);
+  if (title && title[1].toLowerCase().includes("redirect")) {
+    const redirectUrl = html.match(/<meta http-equiv="refresh" content="0;url=(.*?)"/);
+    const redirectUrl2 = html.match(/window\.location\.href\s*=\s*["'](.*?)["']/);
+    const redirectUrl3 = html.match(/window\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/);
+    if (redirectUrl) {
+      console.log("Redirect URL: " + redirectUrl[1]);
+      url = redirectUrl[1];
+      html = await (await fetch(url)).text();
+    } else if (redirectUrl2) {
+      console.log("Redirect URL 2: " + redirectUrl2[1]);
+      url = redirectUrl2[1];
+      html = await (await fetch(url)).text();
+    } else if (redirectUrl3) {
+      console.log("Redirect URL 3: " + redirectUrl3[1]);
+      url = redirectUrl3[1];
+      html = await (await fetch(url)).text();
+    } else {
+      console.log("No redirect URL found");
+    }
+  }
+
   // console.log("HTML: " + html);
   switch (provider) {
 /* {PROVIDER_CASES} */
@@ -191,7 +214,7 @@ async function test() {
   });
 
   // make an array of the extractors and their test results
-  const extractors = {};
+  let extractors = {};
   streamUrls.forEach((item) => {
     if (item.streamUrl && item.streamUrl.startsWith("http")) {
       extractors[item.provider] = "passed";
@@ -199,6 +222,9 @@ async function test() {
       extractors[item.provider] = "failed";
     }
   });
+
+  // DEBUG ONLY: PASS ALL TESTS
+  // extractors = Object.keys(extractors).reduce((acc, key) => { acc[key] = "passed"; return acc; }, {});
   
   // node only, save the test results to a file
   if (typeof process !== "undefined" && process.versions && process.versions.node) {

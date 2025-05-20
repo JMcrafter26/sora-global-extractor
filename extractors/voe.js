@@ -92,7 +92,7 @@ function voeExtractor(html, url = null) {
   } catch (e) {
     throw new Error("Final JSON parse error: " + e.message);
   }
-  console.log("Decoded JSON:", result);
+  // console.log("Decoded JSON:", result);
 
   // check if direct_access_url is set, not null and starts with http
   if (result && typeof result === "object") {
