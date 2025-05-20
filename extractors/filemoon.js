@@ -36,10 +36,19 @@ async function filemoonExtractor(html, url = null) {
     const regex = /<iframe[^>]+src="([^"]+)"[^>]*><\/iframe>/;
     const match = html.match(regex);
     if (match) {
+        console.log("Iframe URL: " + match[1]);
         const iframeUrl = match[1];
-        const response = await fetch(iframeUrl);
-        html = await response.text();
+        const iframeResponse = await soraFetch(iframeUrl, {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "Referer": url,
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            }
+        });
+        console.log("Iframe Response: " + iframeResponse.status);
+        html = await iframeResponse.text();
     }
+    // console.log("HTML: " + html);
 
     // get /<script[^>]*>([\s\S]*?)<\/script>/gi
     const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
@@ -51,6 +60,7 @@ async function filemoonExtractor(html, url = null) {
     // get the script with eval and m3u8
     const evalRegex = /eval\((.*?)\)/;
     const m3u8Regex = /m3u8/;
+    // console.log("Scripts: " + scripts);
     const evalScript = scripts.find(script => evalRegex.test(script) && m3u8Regex.test(script));
     if (!evalScript) {
         console.log("No eval script found");
@@ -160,4 +170,33 @@ function unpack(source) {
         return source;
     }
 }
+
+
+/* REMOVE_START */
+/**
+ * Uses Sora's fetchv2 on ipad, fallbacks to regular fetch on Windows
+ * @author ShadeOfChaos
+ *
+ * @param {string} url The URL to make the request to.
+ * @param {object} [options] The options to use for the request.
+ * @param {object} [options.headers] The headers to send with the request.
+ * @param {string} [options.method='GET'] The method to use for the request.
+ * @param {string} [options.body=null] The body of the request.
+ *
+ * @returns {Promise<Response|null>} The response from the server, or null if the
+ * request failed.
+ */
+async function soraFetch(url, options = { headers: {}, method: 'GET', body: null }) {
+    try {
+        return await fetchv2(url, options.headers ?? {}, options.method ?? 'GET', options.body ?? null);
+    } catch(e) {
+        try {
+            return await fetch(url, options);
+        } catch(error) {
+            return null;
+        }
+    }
+}
+/* REMOVE_END */
+
 /* SCHEME END */

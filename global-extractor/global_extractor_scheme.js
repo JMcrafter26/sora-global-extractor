@@ -87,10 +87,20 @@ function multiExtractor(providers) {
 
 
 async function extractStreamUrlByProvider(url, provider) {
+  const headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Referer": url,
+    "Connection": "keep-alive"
+  };
   // fetch the url
   // and pass the response to the extractor function
   console.log("Fetching URL: " + url);
-  const response = await fetch(url);
+  const response = await soraFetch(url, {
+      headers
+    });
+
   console.log("Response: " + response.status);
   let html = response.text ? await response.text() : response;
   // if title contains redirect, then get the redirect url
@@ -102,15 +112,25 @@ async function extractStreamUrlByProvider(url, provider) {
     if (redirectUrl) {
       console.log("Redirect URL: " + redirectUrl[1]);
       url = redirectUrl[1];
-      html = await (await fetch(url)).text();
+      html = await soraFetch(url, {
+        headers
+      });
+      html = html.text ? await html.text() : html;
+
     } else if (redirectUrl2) {
       console.log("Redirect URL 2: " + redirectUrl2[1]);
       url = redirectUrl2[1];
-      html = await (await fetch(url)).text();
+      html = await soraFetch(url, {
+        headers
+      });
+      html = html.text ? await html.text() : html;
     } else if (redirectUrl3) {
       console.log("Redirect URL 3: " + redirectUrl3[1]);
       url = redirectUrl3[1];
-      html = await (await fetch(url)).text();
+      html = await soraFetch(url, {
+        headers
+      });
+      html = html.text ? await html.text() : html;
     } else {
       console.log("No redirect URL found");
     }
@@ -149,6 +169,19 @@ async function test() {
   // separate test for each provider
   for (const [url, provider] of Object.entries(providers)) {
     i++;
+    // check if [provider]Extractor is defined
+    try {
+      if (eval(`typeof ${provider}Extractor`) !== "function") {
+        // streamUrls.push({
+        //   provider,
+        //   url,
+        //   streamUrl: null,
+        // });
+        continue;
+      }
+    } catch (error) {
+      return;
+    }
     try {
       console.log(`\x1b[33mTesting ${provider}...\x1b[0m (${i}/${Object.keys(providers).length})`);
       const streamUrl = await extractStreamUrlByProvider(url, provider);
@@ -239,6 +272,32 @@ async function test() {
 test();
 
 /* TEST SCHEME END */
+
+
+/**
+ * Uses Sora's fetchv2 on ipad, fallbacks to regular fetch on Windows
+ * @author ShadeOfChaos
+ *
+ * @param {string} url The URL to make the request to.
+ * @param {object} [options] The options to use for the request.
+ * @param {object} [options.headers] The headers to send with the request.
+ * @param {string} [options.method='GET'] The method to use for the request.
+ * @param {string} [options.body=null] The body of the request.
+ *
+ * @returns {Promise<Response|null>} The response from the server, or null if the
+ * request failed.
+ */
+async function soraFetch(url, options = { headers: {}, method: 'GET', body: null }) {
+    try {
+        return await fetchv2(url, options.headers ?? {}, options.method ?? 'GET', options.body ?? null);
+    } catch(e) {
+        try {
+            return await fetch(url, options);
+        } catch(error) {
+            return null;
+        }
+    }
+}
 
 ////////////////////////////////////////////////
 //                 EXTRACTORS                 //

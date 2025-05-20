@@ -42,14 +42,13 @@ The global extractor supports the following extractors:
 | Extractor | Test Passed |
 | -------- | ------- |
 | speedfiles | ✅ |
-| vidmoly | ✅ |
+| vidmoly | ❌ |
 | turbovid | ✅ |
-| bigwarp | ✅ |
+| bigwarp | ❌ |
 | doodstream | ✅ |
 | voe | ✅ |
 | vidoza | ✅ |
 | mp4upload | ✅ |
-| filemoon | ✅ |
 <!-- EXTRACTORS_TABLE_END -->
 
 

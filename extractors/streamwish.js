@@ -1,8 +1,37 @@
-
 async function extractStreamUrl(url) {
-    const embedResponse = await fetch(url);
-    const data = await embedResponse; 
+  try {
+    const response = await fetch(url);
+    const html = (await response.text) ? response.text() : response;
 
+    let streamUrl = null;
+    try {
+      streamUrl = await streamwishExtractor(html);
+    } catch (error) {
+      console.log("streamwish extraction error:" + error);
+    }
+
+    console.log("streamwish Stream URL: " + streamUrl);
+    if (streamUrl && streamUrl !== false && streamUrl !== null) {
+      return streamUrl;
+    }
+
+    console.log("No stream URL found");
+
+    return null;
+  } catch (error) {
+    console.log("Fetch error:", error);
+    return null;
+  }
+}
+
+/* SCHEME START */
+
+/**
+ * @name streamwishExtractor
+ * @author Ibro
+ */
+
+async function streamwishExtractor(data, url = null) {
     const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
 
     const unpackedScript = unpack(obfuscatedScript[1]);
@@ -119,3 +148,5 @@ function unpack(source) {
         return source;
     }
 }
+
+/* SCHEME END */

@@ -50,11 +50,47 @@ def build_extractors(functions):
         f.write(' * Build Time: ' + time.strftime('%Y-%m-%d %H:%M:%S') + '\n')
         f.write(' */\n\n')
 
-        # if it contains duplicate function names, add a warning
+        # Check for duplicate function names and class names
         duplicate_functions = [function for function in functions if list(functions).count(function) > 1]
+        
+        # Extract class names from all function schemes
+        all_class_names = []
+        for scheme in functions.values():
+            # Find all class names in the scheme
+            class_names = [line.split('class ')[1].split(' ')[0] for line in scheme.split('\n') if 'class ' in line]
+            all_class_names.extend(class_names)
+            
+        # Check for duplicate class names
+        duplicate_classes = [cls for cls in all_class_names if all_class_names.count(cls) > 1]
+        
+        # remove duplicates from the list, so there are no duplicates
+        duplicate_functions = list(set(duplicate_functions))
+        duplicate_classes = list(set(duplicate_classes))
         if duplicate_functions:
-            f.write('/* WARNING: Duplicate function names found: ' + str(duplicate_functions) + ' */\n\n')
-            print('WARNING: Duplicate function names found: ' + str(duplicate_functions))
+            print('Duplicate function names found: ' + str(duplicate_functions))
+            print('Resolving by removing duplicates...')
+            for function in duplicate_functions:
+                # remove the function from the list
+                del functions[function]
+        if duplicate_classes:
+            print('Duplicate class names found: ' + str(duplicate_classes))
+            print('Resolving by removing duplicates...')
+            for cls in duplicate_classes:
+                # remove the class from the list
+                for function, scheme in functions.items():
+                    if cls in scheme:
+                        del functions[function]
+                        break
+        
+                    
+        
+        # remove all instances of content between /* REMOVE_START */ and /* REMOVE_END */
+        for function_name, scheme in functions.items():
+            start = scheme.find('/* REMOVE_START */')
+            end = scheme.find('/* REMOVE_END */')
+            if start != -1 and end != -1:
+                scheme = scheme[:start] + scheme[end + len('/* REMOVE_END */'):]
+                functions[function_name] = scheme
         
         # remove double linebreaks
         for function_name, scheme in functions.items():
@@ -64,6 +100,7 @@ def build_extractors(functions):
         for function_name, scheme in functions.items():
             f.write('/* --- ' + function_name + ' --- */\n')
             f.write(scheme + '\n\n')
+
 
         # save the functions to a json file
         with open(os.path.join(script_dir, 'output', 'extractors.json'), 'w') as json_file:
@@ -98,8 +135,12 @@ def build_global_extractor(functions, allowed_functions=[]):
             lines = lines[6:]
             # join the lines
             extractors_content = '\n'.join(lines)
+
+
             # replace the /* {EXTRACTOR_FUNCTIONS} */ with the content
             content = content.replace('/* {EXTRACTOR_FUNCTIONS} */', extractors_content)
+        
+
 
 
 
