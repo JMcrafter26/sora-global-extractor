@@ -42,8 +42,6 @@ async function doodstreamExtractor(html, url = null) {
         const expiryTimestamp = new Date().valueOf();
         const random = randomStr(10);
 
-
-
         const passResponse = await fetch(`https://${streamDomain}/pass_md5/${md5Path}`, {
             headers: {
                 "Referer": url,

@@ -22,6 +22,9 @@ This is a collection of tools to extract stream URLs from various streaming serv
 | [Vidmoly](./extractors/vidmoly.js) | [Ibro](https://github.com/xibrox) | ✅ |
 | [DoodStream](./extractors/doodstream.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
 | [Vidoza](./extractors/vidoza.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
+| [MP4Upload](./extractors/mp4upload.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
+| [FileMoon](./extractors/filemoon.js) | [Cufiy](https://github.com/JMcrafter26) & Churly | ✅ |
+| [DoodStream](./extractors/doodstream.js) | [Cufiy](https://github.com/JMcrafter26) | ✅ |
 
 ## Global Extractor
 
@@ -45,6 +48,8 @@ The global extractor supports the following extractors:
 | doodstream | ✅ |
 | voe | ✅ |
 | vidoza | ✅ |
+| mp4upload | ✅ |
+| filemoon | ✅ |
 <!-- EXTRACTORS_TABLE_END -->
 
 
