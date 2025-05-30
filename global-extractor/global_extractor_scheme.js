@@ -69,7 +69,8 @@ async function multiExtractor(providers) {
   ]
 }
   */
-   const streams = [];
+   
+ const streams = [];
   const providersCount = {};
   for (const [url, provider] of Object.entries(providers)) {
     try {
@@ -82,24 +83,24 @@ async function multiExtractor(providers) {
       // check if streamUrl is not null, a string, and starts with http or https
         // check if provider is already in streams, if it is, add a number to it
       if (!streamUrl || typeof streamUrl !== "string" || !streamUrl.startsWith("http")) {
+        continue; // skip if streamUrl is not valid
+      }
           if (providersCount[provider]) {
             providersCount[provider]++;
             streams.push(
-              `${provider} (${providersCount[provider]})`,
+              provider + " (" + providersCount[provider] + ")",
               streamUrl
             );
           } else {
             providersCount[provider] = 1;
             streams.push(provider, streamUrl);
           }
-        }
     } catch (error) {
       // Ignore the error and try the next provider
     }
   }
   return streams;
 }
-
 
 async function extractStreamUrlByProvider(url, provider) {
   if (eval(`typeof ${provider}Extractor`) !== "function") {
