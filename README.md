@@ -44,7 +44,7 @@ The global extractor supports the following extractors:
 | speedfiles | ✅ |
 | vidmoly | ✅ |
 | turbovid | ❌ |
-| bigwarp | ❌ |
+| bigwarp | ✅ |
 | doodstream | ✅ |
 | voe | ✅ |
 | vidoza | ✅ |

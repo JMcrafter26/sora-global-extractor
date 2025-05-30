@@ -73,6 +73,11 @@ async function multiExtractor(providers) {
   const providersCount = {};
   for (const [url, provider] of Object.entries(providers)) {
     try {
+      // check if providercount is not bigger than 3
+      if (providersCount[provider] && providersCount[provider] >= 3) {
+        console.log(`Skipping ${provider} as it has already 3 streams`);
+        continue;
+      }
       const streamUrl = await extractStreamUrlByProvider(url, provider);
       // check if streamUrl is not null, a string, and starts with http or https
         // check if provider is already in streams, if it is, add a number to it
