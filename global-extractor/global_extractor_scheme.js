@@ -330,6 +330,7 @@ async function soraFetch(url, options = { headers: {}, method: 'GET', body: null
         try {
             return await fetch(url, options);
         } catch(error) {
+            await console.log('soraFetch error: ' + error.message);
             return null;
         }
     }
