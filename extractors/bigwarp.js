@@ -1,6 +1,6 @@
 async function extractStreamUrl(url) {
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { headers: { 'Referer': 'https://bigwarp.art/', "x-requested-with": 'XMLHttpRequest' } });
     const html = (await response.text) ? response.text() : response;
 
     let streamUrl = null;
