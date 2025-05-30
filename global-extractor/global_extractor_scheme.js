@@ -88,7 +88,7 @@ async function multiExtractor(providers) {
           if (providersCount[provider]) {
             providersCount[provider]++;
             streams.push(
-              provider + " (" + providersCount[provider] + ")",
+              provider + "-" + providersCount[provider],
               streamUrl
             );
           } else {
