@@ -70,7 +70,7 @@ async function multiExtractor(providers) {
 }
   */
    
- const streams = [];
+const streams = [];
   const providersCount = {};
   for (const [url, provider] of Object.entries(providers)) {
     try {
@@ -88,12 +88,12 @@ async function multiExtractor(providers) {
           if (providersCount[provider]) {
             providersCount[provider]++;
             streams.push(
-              provider + "-" + providersCount[provider],
+              provider.charAt(0).toUpperCase() + provider.slice(1) + "-" + providersCount[provider],
               streamUrl
             );
           } else {
             providersCount[provider] = 1;
-            streams.push(provider, streamUrl);
+            streams.push(provider.charAt(0).toUpperCase() + provider.slice(1), streamUrl);
           }
     } catch (error) {
       // Ignore the error and try the next provider
