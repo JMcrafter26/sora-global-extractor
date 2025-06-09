@@ -17,7 +17,25 @@ async function extractStreamUrl(url) {
     //   "https://speedfiles.net/82346fs": "speedfiles",
     // };
 
+    // Choose one of the following:
 
+    // Multiple extractor (recommended)
+    let streams = [];
+    try {
+      streams = await multiExtractor(newProviderArray);
+      let returnedStreams = {
+        streams: streams,
+      }
+
+      console.log("Multi extractor streams: " + JSON.stringify(returnedStreams));
+      return JSON.stringify(returnedStreams);
+    } catch (error) {
+      console.log("Multi extractor error:" + error);
+      return JSON.stringify([{ provider: "Error2", link: "" }]);
+    }
+
+
+    // Single extractor
     let streamUrl = null;
     try {
       streamUrl = globalExtractor(providers);
@@ -26,11 +44,12 @@ async function extractStreamUrl(url) {
       return null;
     }
 
-
     if (!streamUrl) {
       throw new Error("Stream URL not found");
     }
     return streamUrl;
+
+
   } catch (error) {
     console.log("Fetch error:", error);
     return null;

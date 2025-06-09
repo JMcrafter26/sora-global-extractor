@@ -1,7 +1,7 @@
 {
   "speedfiles": "passed",
   "vidmoly": "passed",
-  "turbovid": "failed",
+  "turbovid": "passed",
   "bigwarp": "passed",
   "doodstream": "passed",
   "voe": "passed",
