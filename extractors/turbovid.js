@@ -74,13 +74,8 @@ function getJsVarValue(html, varName) {
 }
 
 async function fetchJuiceKeys(embedUrl) {
-  // console.log("fetchJuiceKeys called with embedUrl:", embedUrl);
-  // const headers = `Referer=${embedUrl}|Origin=${embedUrl}`;
-
   const fetchUrl =
     atob("aHR0cHM6Ly90dXJib3ZpZC5ldS9hcGkvY3Vja2VkLw==") + "juice_key";
-  // const vercelUrl = `https://sora-passthrough.vercel.app/passthrough?url=${fetchUrl}&headers=${headers} }`;
-  // const response = await fetch(vercelUrl);
 
   const response = await fetch(fetchUrl, {
     headers: {
@@ -102,10 +97,6 @@ async function fetchEncryptedPayload(embedUrl, apKey, xxId) {
     "=" +
     xxId;
   console.log("url:", url);
-
-  // const headers = `Referer=${embedUrl}|Origin=${embedUrl}`;
-  // const vercelUrl = `https://sora-passthrough.vercel.app/passthrough?url=${url}&headers=${headers} }`;
-  // const response = await fetch(vercelUrl);
 
   const response = await fetch(url, {
     headers: {
