@@ -32,7 +32,7 @@ async function extractStreamUrl(url) {
     // Multiple extractor (recommended)
     let streams = [];
     try {
-      streams = await multiExtractor(newProviderArray);
+      streams = await multiExtractor(providers);
       let returnedStreams = {
         streams: streams,
       }
