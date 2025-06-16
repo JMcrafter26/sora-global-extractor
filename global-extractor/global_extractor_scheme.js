@@ -1,5 +1,9 @@
+/* {GE START} */
+/* {VERSION: {GE VERSION}} */
+
 /* {HEADER} */
 
+/* {GE TEMPLATE FUNCTION START} */
 async function extractStreamUrl(url) {
   try {
     let providers = {};
@@ -14,7 +18,8 @@ async function extractStreamUrl(url) {
     // providers = {
     //   "https://vidmoly.to/embed-preghvoypr2m.html": "vidmoly",
     //   "https://speedfiles.net/40d98cdccf9c": "speedfiles",
-    //   "https://speedfiles.net/82346fs": "speedfiles",
+    //   "https://example.com/video.mp4": "direct-SomeName", // this will add the url to the streams array directly, you can customize the name after the "direct-" prefix
+    //   "https://speedfiles.net/82346fs": "speedfiles-2", // you can also add a name or a number to the provider, this will be used as the name in the streams array
     // };
 
     // Choose one of the following:
@@ -55,6 +60,7 @@ async function extractStreamUrl(url) {
     return null;
   }
 }
+/* {GE TEMPLATE FUNCTION END} */
 
 function globalExtractor(providers) {
   for (const [url, provider] of Object.entries(providers)) {
@@ -91,8 +97,36 @@ async function multiExtractor(providers) {
 
   const streams = [];
   const providersCount = {};
-  for (const [url, provider] of Object.entries(providers)) {
+  for (let [url, provider] of Object.entries(providers)) {
     try {
+      // if provider starts with "direct-", then add the url to the streams array directly
+      if (provider.startsWith("direct-")) {
+        const directName = provider.slice(7); // remove "direct-" prefix
+        if (directName && directName.length > 0) {
+          streams.push(directName, url);
+        } else {
+          streams.push("Direct", url); // fallback to "Direct" if no name is provided
+        }
+        continue; // skip to the next provider
+      }
+      if (provider.startsWith("direct")) {
+        provider = provider.slice(7); // remove "direct-" prefix
+        if (provider && provider.length > 0) {
+          streams.push(provider, url);
+        } else {
+          streams.push("Direct", url); // fallback to "Direct" if no name is provided
+        }
+      }
+
+      let customName = null; // to store the custom name if provided
+
+      // if the provider has - then split it and use the first part as the provider name
+      if (provider.includes("-")) {
+        const parts = provider.split("-");
+        provider = parts[0]; // use the first part as the provider name
+        customName = parts.slice(1).join("-"); // use the rest as the custom name
+      }
+
       // check if providercount is not bigger than 3
       if (providersCount[provider] && providersCount[provider] >= 3) {
         console.log(`Skipping ${provider} as it has already 3 streams`);
@@ -108,13 +142,19 @@ async function multiExtractor(providers) {
       ) {
         continue; // skip if streamUrl is not valid
       }
+
+      // if customName is defined, use it as the name
+      if (customName && customName.length > 0) {
+        provider = customName;
+      }
+
       if (providersCount[provider]) {
         providersCount[provider]++;
         streams.push(
           provider.charAt(0).toUpperCase() +
             provider.slice(1) +
             "-" +
-            providersCount[provider],
+            (providersCount[provider] - 1), // add a number to the provider name
           streamUrl
         );
       } else {
@@ -315,9 +355,9 @@ async function test() {
   // extractors = Object.keys(extractors).reduce((acc, key) => { acc[key] = "passed"; return acc; }, {});
 
   // if its speedfiles, let it pass (because the site is currently under maintenance, but the extractor is working)
-  // if (extractors["speedfiles"] && extractors["speedfiles"] === "failed") {
-  //   extractors["speedfiles"] = "passed";
-  // }
+  if (extractors["speedfiles"] && extractors["speedfiles"] === "failed") {
+    extractors["speedfiles"] = "passed";
+  }
   
   // node only, save the test results to a file
   if (typeof process !== "undefined" && process.versions && process.versions.node) {
@@ -367,3 +407,5 @@ async function soraFetch(url, options = { headers: {}, method: 'GET', body: null
 // DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING //
 
 /* {EXTRACTOR_FUNCTIONS} */
+
+/* {GE END} */

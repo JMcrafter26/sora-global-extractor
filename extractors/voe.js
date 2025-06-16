@@ -145,5 +145,4 @@ function voeShiftChars(str, shift) {
     .map((c) => String.fromCharCode(c.charCodeAt(0) - shift))
     .join("");
 }
-
 /* SCHEME END */
