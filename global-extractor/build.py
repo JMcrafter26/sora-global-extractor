@@ -202,11 +202,15 @@ def build_global_extractor(functions, allowed_functions=[]):
         if allowed_functions:
             with open(os.path.join(script_dir, 'output', 'global_extractor.js'), 'w') as f:
                 f.write(content)
+            # also save the file to ../global_extractor.js
+            with open(os.path.join(script_dir, '..', 'global_extractor.js'), 'w') as f:
+                f.write(content)
         else:
             # save the file to output/global_extractor.js
             content = '/* WARNING: This file contains all the extractors, working and not working and is not recommended to be used. */\n' + content
             with open(os.path.join(script_dir, 'output', 'global_extractor_all.js'), 'w') as f:
                 f.write(content)
+        
 
 
 
