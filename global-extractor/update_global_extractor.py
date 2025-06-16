@@ -1,3 +1,11 @@
+"""
+@name: update_global_extractor.py
+@description: A script to update global extractor files in a project.
+@version: 1.0.0
+@author: JMcrafter26
+@license: MIT License
+"""
+
 import os
 import requests
 import re
