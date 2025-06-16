@@ -38,14 +38,14 @@ def search_for_extractor():
     
     extractorFiles = []
     awaitingUpdateFiles = []
+    legacyFiles = []
     fileCount = 0
     
     for root, dirs, files in os.walk(currentDir):
-        for filename in files:
-            # if fileextension is .js
+        for filename in files:            # if fileextension is .js
             if filename.endswith(".js"):
                 fileCount += 1
-                with open(os.path.join(root, filename), 'r') as file:
+                with open(os.path.join(root, filename), 'r', encoding='utf-8') as file:
                     content = file.read()
                     # check if "/* {GE START} */" and "/* {GE END} */" are in the file
                     if "/* {GE START} */" in content and "/* {GE END} */" in content:
@@ -70,7 +70,16 @@ def search_for_extractor():
                             print(f"   ❌ {Colors.RED}VERSION NOT FOUND - UPDATE NEEDED{Colors.END}")
                             awaitingUpdateFiles.append(filePath)
                         print()  # Add blank line for separation
-    
+                    # elif contains @name global_extractor.js - legacy extractor
+                    elif "@name global_extractor.js" in content or "function multiExtractor(providers)" in content:
+                        filePath = os.path.join(root, filename)
+                        legacyFiles.append(filePath)
+                        print(f"⚠️  {Colors.YELLOW}Legacy extractor found. Please update manually:{Colors.END}")
+                        print(f"   📄 {Colors.BOLD}{filePath}{Colors.END}")
+                        print(f"   ❗ {Colors.YELLOW}This file is outdated and should be replaced with the new global extractor.{Colors.END}")
+                        print()  # Add blank line for separation
+
+
     print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
     print(f"{Colors.CYAN}📊 SCAN RESULTS{Colors.END}")
     print(f"{Colors.CYAN}{'='*60}{Colors.END}")
@@ -103,7 +112,7 @@ def get_global_extractor_github():
     response = requests.get(extractorUrl)
     if response.status_code == 200:
         print(f"✅ {Colors.GREEN}Download completed successfully!{Colors.END}")
-        with open("global_extractor_update.js", 'w') as file:
+        with open("global_extractor_update.js", 'w', encoding='utf-8') as file:
             file.write(response.text)
         
         print(f"🔧 Preparing global extractor...")
@@ -122,7 +131,7 @@ def prepare_global_extractor():
     global latestVersionNumber
     print(f"   🔍 Validating downloaded file...")
     
-    with open("global_extractor_update.js", 'r') as file:
+    with open("global_extractor_update.js", 'r', encoding='utf-8') as file:
         content = file.read()
     
     # Check if the file contains the correct version comment
@@ -166,10 +175,8 @@ def prepare_global_extractor():
 
     # remove all \n\n\n
     content = content.replace("\n\n\n", "\n")
-    print(f"   ✅ Formatting optimized")
-
-    # write the content back to the file
-    with open("global_extractor_update.js", 'w') as file:
+    print(f"   ✅ Formatting optimized")    # write the content back to the file
+    with open("global_extractor_update.js", 'w', encoding='utf-8') as file:
         file.write(content)
     return True
 
@@ -195,7 +202,7 @@ def updateExtractorFiles(files):
         print(f"🔄 [{i}/{len(files)}] Updating: {Colors.BLUE}{file}{Colors.END}")
         
         try:
-            with open(file, 'r') as f:
+            with open(file, 'r', encoding='utf-8') as f:
                 content = f.read()
             
             # get /* {GE START} */ and /* {GE END} */ content
@@ -205,13 +212,12 @@ def updateExtractorFiles(files):
                 print(f"   ❌ {Colors.RED}Invalid extractor file - missing markers{Colors.END}")
                 errorFiles.append(file)
                 continue
-                
-            # replace the content between /* {GE START} */ and /* {GE END} */ with the new global extractor
-            with open("global_extractor_update.js", 'r') as extractorFile:
+                  # replace the content between /* {GE START} */ and /* {GE END} */ with the new global extractor
+            with open("global_extractor_update.js", 'r', encoding='utf-8') as extractorFile:
                 extractorContent = extractorFile.read()
             newContent = content[:start + len("/* {GE START} */")] + extractorContent + content[end:]
             
-            with open(file, 'w') as f:
+            with open(file, 'w', encoding='utf-8') as f:
                 f.write(newContent)
             print(f"   ✅ {Colors.GREEN}Successfully updated{Colors.END}")
             
