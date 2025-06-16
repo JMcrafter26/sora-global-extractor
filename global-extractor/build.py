@@ -141,11 +141,12 @@ def build_global_extractor(functions, allowed_functions=[]):
     global_extractor_file = os.path.join(script_dir, 'global_extractor_scheme.js')
     with open(global_extractor_file, 'r', encoding='utf-8') as f:
         content = f.read()        # get version from VERSION file
-        version_file = os.path.join(script_dir, 'VERSION')
+        version_file = os.path.join(script_dir, 'VERSION.json')
         version = '1.0.0'  # default version
         if os.path.exists(version_file):
             with open(version_file, 'r', encoding='utf-8') as vf:
-                version = vf.read().strip()
+                version_data = json.load(vf)
+                version = version_data["extractor"]
                 content = content.replace('{GE VERSION}', version)
                 print(f"📋 Version: {Colors.GREEN}{version}{Colors.END}")
 

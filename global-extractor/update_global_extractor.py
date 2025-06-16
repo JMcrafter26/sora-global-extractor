@@ -27,6 +27,7 @@ def get_latest_version_number():
 
 def search_for_extractor():
     global latestVersionNumber
+    remove_global_extractor()
 
     print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
     print(f"{Colors.CYAN}🔍 SEARCHING FOR GLOBAL EXTRACTOR FILES{Colors.END}")
@@ -86,6 +87,11 @@ def search_for_extractor():
     print(f"📁 JavaScript files scanned: {Colors.BLUE}{fileCount}{Colors.END}")
     print(f"✅ Global extractor files found: {Colors.GREEN}{len(extractorFiles)}{Colors.END}")
     print(f"⚠️  Files needing updates: {Colors.YELLOW}{len(awaitingUpdateFiles)}{Colors.END}")
+    if legacyFiles:
+        print(f"⚠️  Legacy extractor files found: {Colors.YELLOW}{len(legacyFiles)}{Colors.END}")
+        print(f"   Please update these files manually to the new global extractor format.")
+        for i, file in enumerate(legacyFiles, 1):
+            print(f"   {i}. {Colors.YELLOW}{file}{Colors.END}")
     
     if not extractorFiles:
         print(f"\n❌ {Colors.RED}No global extractor files found in the current directory.{Colors.END}")
