@@ -2,9 +2,9 @@
 
 A comprehensive collection of JavaScript extractors for retrieving stream URLs from various hosting services. Designed specifically for integration with Sora iOS application modules.
 
-[![License](https://img.shields.io/badge/License-Custom-blue.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.1.0-green.svg)](./global-extractor/VERSION.json)
-[![Extractors](https://img.shields.io/badge/Extractors-10-orange.svg)](#available-extractors)
+[![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
+[![Version](https://api.jm26.net/b/Version-1.1.0-green)](./global-extractor/VERSION.json)
+[![Extractors](https://api.jm26.net/b/Extractors-8-orange)](#available-extractors)
 
 ## 📋 Table of Contents
 
@@ -30,13 +30,14 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
     - [Building the Global Extractor](#building-the-global-extractor)
     - [Running Tests](#running-tests)
     - [Contributing](#contributing)
+  - [📝 Changelog](#-changelog)
   - [📄 License](#-license)
 
 </details>
 
 ## ✨ Features
 
-- 🎯 **10+ Extractors**: Support for major streaming platforms
+- 🎯 **Many Extractors**: Support for major streaming platforms
 - 🔄 **Auto-Updates**: Automated extractor updates via Python script
 - 🚀 **Multi-Threading**: Parallel extraction for better performance
 - 🛡️ **Error Handling**: Robust error management and fallback options
@@ -50,10 +51,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
    - Use the [Global Extractor](#-global-extractor) for multiple providers (recommended)
    - Use individual extractors from the `extractors/` folder
 
-2. **Copy the global extractor to your Sora module:**
-   ```bash
-   cp global-extractor/output/global_extractor.js your-module/
-   ```
+2. **Copy the global extractor to your Sora module**
 
 3. **Replace your `extractStreamUrl` function with the global extractor template**
 
@@ -99,6 +97,12 @@ The global extractor supports the following extractors:
 | voe | ✅ |
 | vidoza | ✅ |
 | mp4upload | ✅ |
+
+> **Last updated**: June 17, 2025
+>
+> **Test Environment**: Automated CI/CD pipeline with real-world scenarios
+>
+> **Success Rate**: 87.50% (7/8 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -277,6 +281,14 @@ node global_extractor_test.js
 5. Test your changes
 6. Submit a pull request
 
+## 📝 Changelog
+
+For detailed information about changes, improvements, and version history, see our [CHANGELOG.md](./CHANGELOG.md).
+
+**Recent Updates:**
+- **v1.1.1** (June 17, 2025): Direct URL support, enhanced auto-updater, custom provider naming
+- **v1.1.0** (June 9, 2025): Multi-extractor support, global extractor system
+- **v1.0.0**: Initial stable release with core extractors
 
 ## 📄 License
 
@@ -293,6 +305,6 @@ This project is licensed under a **Custom License** that restricts usage to the 
 
 **Made with ❤️ for the Sora Community**
 
-[🌐 Sora Modules Library](https://sora.jm26.net/library) • [📚 Documentation](./README.md) • [🐛 Report Issues](https://github.com/JMcrafter26/sora-streamurl-extractors/issues)
+[🌐 Sora Modules Library](https://sora.jm26.net/library) • [📚 Documentation](./README.md) • [📝 Changelog](./CHANGELOG.md) • [🐛 Report Issues](https://github.com/JMcrafter26/sora-streamurl-extractors/issues)
 
 </div>

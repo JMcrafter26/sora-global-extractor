@@ -357,10 +357,14 @@ async function test() {
   // DEBUG ONLY: PASS ALL TESTS
   // extractors = Object.keys(extractors).reduce((acc, key) => { acc[key] = "passed"; return acc; }, {});
 
-  // if its speedfiles, let it pass (because the site is currently under maintenance, but the extractor is working)
-  if (extractors["speedfiles"] && extractors["speedfiles"] === "failed") {
-    extractors["speedfiles"] = "passed";
-  }
+  // // if its speedfiles, let it pass (because the site is currently under maintenance, but the extractor is working)
+  // if (extractors["speedfiles"] && extractors["speedfiles"] === "failed") {
+  //   extractors["speedfiles"] = "passed";
+  // }
+  // // same for doodstream
+  // if (extractors["doodstream"] && extractors["doodstream"] === "failed") {
+  //   extractors["doodstream"] = "passed";
+  // }
   
   // node only, save the test results to a file
   if (typeof process !== "undefined" && process.versions && process.versions.node) {

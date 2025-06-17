@@ -2,3 +2,4 @@
 *.pyo
 *.pyd
 __pycache__/
+*.dev*

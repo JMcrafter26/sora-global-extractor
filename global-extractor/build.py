@@ -1,6 +1,8 @@
 import os
 import time
 import json
+import re
+
 
 # ../extractors/
 extractors_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'extractors')
@@ -337,6 +339,13 @@ def test():
                 new_table_content += '| ' + provider + ' | ❌ |\n'
                 print(f"   ❌ {Colors.RED}{provider}: FAILED{Colors.END}")
                 failed_count += 1
+
+
+    new_table_content += '\n> **Last updated**: ' + time.strftime('%B %d, %Y') + '\n>\n'
+    new_table_content += '> **Test Environment**: Automated CI/CD pipeline with real-world scenarios\n>\n'
+    success_rate = (passed_count / (passed_count + failed_count)) * 100 if (passed_count + failed_count) > 0 else 0
+    new_table_content += f'> **Success Rate**: {success_rate:.2f}% ({passed_count}/{passed_count + failed_count} extractors passing)\n'
+
     
     print(f"\n{Colors.CYAN}📊 SUMMARY:{Colors.END}")
     print(f"✅ Passed: {Colors.GREEN}{passed_count}{Colors.END}")
@@ -355,10 +364,20 @@ def test():
             return
         # replace the table with the new table
         new_table_content = readme_content[:start] + new_table_content + readme_content[end:]
+
+    # update the [![Extractors](https://api.jm26.net/b/Extractors-10-orange)](#available-extractors) badge in README.md
+    # get it via regex
+        badge_pattern = r'\[!\[Extractors\]\(https://api\.jm26\.net/b/Extractors-\d+-orange\)\]\(#available-extractors\)'
+        badge_replacement = f"[![Extractors](https://api.jm26.net/b/Extractors-{len(test_results)}-orange)](#available-extractors)"
+        new_table_content = re.sub(badge_pattern, badge_replacement, new_table_content)
+    
         # write the file
         with open(os.path.join(script_dir, '..', 'README.md'), 'w', encoding='utf-8') as f:
             f.write(new_table_content)
             print(f"✅ {Colors.GREEN}README.md updated successfully!{Colors.END}")
+    
+
+    
     
     print(f"{Colors.CYAN}{'='*60}{Colors.END}\n")
     return test_results
