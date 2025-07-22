@@ -9,8 +9,9 @@
 import os
 import requests
 import re
+import random
 
-updaterVersion = "1.0.0"
+updaterVersion = "1.0.1"
 latestVersionNumber = None
 awaitingUpdateFiles = []
 class Colors:
@@ -26,7 +27,7 @@ class Colors:
     END = '\033[0m'  # Reset to default
 
 def get_latest_version_number():
-    versionUrl = "https://raw.githubusercontent.com/JMcrafter26/sora-global-extractor/refs/heads/main/global-extractor/VERSION.json"
+    versionUrl = "https://raw.githack.com/JMcrafter26/sora-global-extractor/main/global-extractor/VERSION.json" + "?r=" + str(random.randint(100000, 999999))
     response = requests.get(versionUrl)
     if response.status_code == 200:
         data = response.json()
