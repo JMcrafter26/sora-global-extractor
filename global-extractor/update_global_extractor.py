@@ -281,6 +281,7 @@ if __name__ == "__main__":
         print(f"   Current Version: {Colors.YELLOW}{updaterVersion}{Colors.END}")
         print(f"   Latest Version:  {Colors.GREEN}{latestUpdaterVersion}{Colors.END}")
         print(f"   Please update the updater script to the latest version.")
+        print(f"   Repo: {Colors.BLUE}https://github.com/JMcrafter26/sora-global-extractor{Colors.END}")
         exit(1)
     latestVersionNumber = latestVersionNumber["extractor"]
     print(f"✅ Latest Version: {Colors.GREEN}{latestVersionNumber}{Colors.END}")
