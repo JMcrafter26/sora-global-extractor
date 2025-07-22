@@ -3,7 +3,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.1.1} */
+/* {VERSION: 1.1.2} */
 
 /**
  * @name global_extractor.js
@@ -11,8 +11,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2025-07-22 22:56:10
- * @version 1.1.1
+ * @date 2025-07-22 23:05:50
+ * @version 1.1.2
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
