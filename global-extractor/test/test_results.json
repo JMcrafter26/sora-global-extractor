@@ -1,9 +1,9 @@
 {
-  "speedfiles": "passed",
   "vidmoly": "passed",
   "turbovid": "failed",
   "bigwarp": "passed",
-  "doodstream": "passed",
+  "filemoon": "passed",
+  "doodstream": "failed",
   "voe": "passed",
   "vidoza": "passed",
   "mp4upload": "passed"

@@ -74,6 +74,20 @@ def build_extractors(functions):
         f.write(' * Build Time: ' + time.strftime('%Y-%m-%d %H:%M:%S') + '\n')
         f.write(' */\n\n')
 
+
+        
+        
+        # remove all instances of content between /* REMOVE_START */ and /* REMOVE_END */
+        print(f"🧹 {Colors.CYAN}Cleaning up extractor code...{Colors.END}")
+        for function_name, scheme in functions.items():
+            start = scheme.find('/* REMOVE_START */')
+            end = scheme.find('/* REMOVE_END */')
+            if start != -1 and end != -1:
+                # remove the content between the lines
+                scheme = scheme[:start] + scheme[end + len('/* REMOVE_END */'):]
+                functions[function_name] = scheme
+                print(f"✅ {Colors.GREEN}Removed unwanted code from {function_name}{Colors.END}")
+
         # Check for duplicate function names and class names
         duplicate_functions = [function for function in functions if list(functions).count(function) > 1]
         
@@ -107,15 +121,6 @@ def build_extractors(functions):
                         break
         
                     
-        
-        # remove all instances of content between /* REMOVE_START */ and /* REMOVE_END */
-        print(f"🧹 {Colors.CYAN}Cleaning up extractor code...{Colors.END}")
-        for function_name, scheme in functions.items():
-            start = scheme.find('/* REMOVE_START */')
-            end = scheme.find('/* REMOVE_END */')
-            if start != -1 and end != -1:
-                scheme = scheme[:start] + scheme[end + len('/* REMOVE_END */'):]
-                functions[function_name] = scheme
         
         # remove double linebreaks
         for function_name, scheme in functions.items():

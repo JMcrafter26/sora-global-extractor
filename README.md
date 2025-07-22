@@ -89,20 +89,20 @@ The global extractor supports the following extractors:
 <!-- EXTRACTORS_TABLE_START -->
 | Extractor | Test Passed |
 | -------- | ------- |
-| speedfiles | ✅ |
 | vidmoly | ✅ |
 | turbovid | ❌ |
 | bigwarp | ✅ |
-| doodstream | ✅ |
+| filemoon | ✅ |
+| doodstream | ❌ |
 | voe | ✅ |
 | vidoza | ✅ |
 | mp4upload | ✅ |
 
-> **Last updated**: June 17, 2025
+> **Last updated**: July 22, 2025
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 87.50% (7/8 extractors passing)
+> **Success Rate**: 75.00% (6/8 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage

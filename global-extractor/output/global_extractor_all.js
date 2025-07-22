@@ -11,7 +11,7 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2025-06-17 15:51:33
+ * @date 2025-07-22 22:56:10
  * @version 1.1.1
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
@@ -26,7 +26,7 @@ async function extractStreamUrl(url) {
     // Logic to populate providers
     // ...
     // Note: The higher up the provider is in the list, the higher the priority
-    // Available providers: bigwarp, doodstream, mp4upload, speedfiles, streamwish, turbovid, vidmoly, vidoza, voe
+    // Available providers: bigwarp, doodstream, filemoon, mp4upload, streamwish, turbovid, vidmoly, vidoza, voe
 
 
     // E.g.
@@ -262,18 +262,18 @@ async function extractStreamUrlByProvider(url, provider) {
          console.log("Error extracting stream URL from doodstream:", error);
          return null;
       }
+    case "filemoon":
+      try {
+         return await filemoonExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from filemoon:", error);
+         return null;
+      }
     case "mp4upload":
       try {
          return await mp4uploadExtractor(html, url);
       } catch (error) {
          console.log("Error extracting stream URL from mp4upload:", error);
-         return null;
-      }
-    case "speedfiles":
-      try {
-         return await speedfilesExtractor(html, url);
-      } catch (error) {
-         console.log("Error extracting stream URL from speedfiles:", error);
          return null;
       }
     case "streamwish":
@@ -408,6 +408,59 @@ function randomStr(length) {
 }
 
 
+/* --- filemoon --- */
+
+/**
+ * @name filemoonExtractor
+ * @author Cufiy - Inspired by Churly
+ */
+async function filemoonExtractor(html, url = null) {
+    // check if contains iframe, if does, extract the src and get the url
+    const regex = /<iframe[^>]+src="([^"]+)"[^>]*><\/iframe>/;
+    const match = html.match(regex);
+    if (match) {
+        console.log("Iframe URL: " + match[1]);
+        const iframeUrl = match[1];
+        const iframeResponse = await soraFetch(iframeUrl, {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            }
+        });
+        console.log("Iframe Response: " + iframeResponse.status);
+        html = await iframeResponse.text();
+    }
+    // console.log("HTML: " + html);
+    // get /<script[^>]*>([\s\S]*?)<\/script>/gi
+    const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
+    const scripts = [];
+    let scriptMatch;
+    while ((scriptMatch = scriptRegex.exec(html)) !== null) {
+        scripts.push(scriptMatch[1]);
+    }
+    // get the script with eval and m3u8
+    const evalRegex = /eval\((.*?)\)/;
+    const m3u8Regex = /m3u8/;
+    // console.log("Scripts: " + scripts);
+    const evalScript = scripts.find(script => evalRegex.test(script) && m3u8Regex.test(script));
+    if (!evalScript) {
+        console.log("No eval script found");
+        return null;
+    }
+    const unpackedScript = unpack(evalScript);
+    // get the m3u8 url
+    const m3u8Regex2 = /https?:\/\/[^\s]+master\.m3u8[^\s]*?(\?[^"]*)?/;
+    const m3u8Match = unpackedScript.match(m3u8Regex2);
+    if (m3u8Match) {
+        return m3u8Match[0];
+    } else {
+        console.log("No M3U8 URL found");
+        return null;
+    }
+}
+
+
+
 /* --- mp4upload --- */
 
 /**
@@ -424,67 +477,6 @@ async function mp4uploadExtractor(html, url = null) {
     console.log("No match found for mp4upload extractor");
     return null;
   }
-}
-
-
-/* --- speedfiles --- */
-
-/**
- * @name speedfilesExtractor
- * @author Cufiy
- */
-function speedfilesExtractor(sourcePageHtml) {
-  // get var _0x5opu234 = "THIS_IS_AN_ENCODED_STRING"
-  const REGEX = /var\s+_0x5opu234\s*=\s*"([^"]+)"/;
-  const match = sourcePageHtml.match(REGEX);
-  if (match == null || match[1] == null) {
-    console.log("Could not extract from Speedfiles source");
-    return null;
-  }
-  const encodedString = match[1];
-  console.log("Encoded String:" + encodedString);
-  // Step 1: Base64 decode the initial string
-  let step1 = atob(encodedString);
-  // Step 2: Swap character cases and reverse
-  let step2 = step1
-    .split("")
-    .map((c) =>
-      /[a-zA-Z]/.test(c)
-        ? c === c.toLowerCase()
-          ? c.toUpperCase()
-          : c.toLowerCase()
-        : c
-    )
-    .join("");
-  let step3 = step2.split("").reverse().join("");
-  // Step 3: Base64 decode again and reverse
-  let step4 = atob(step3);
-  let step5 = step4.split("").reverse().join("");
-  // Step 4: Hex decode pairs
-  let step6 = "";
-  for (let i = 0; i < step5.length; i += 2) {
-    step6 += String.fromCharCode(parseInt(step5.substr(i, 2), 16));
-  }
-  // Step 5: Subtract 3 from character codes
-  let step7 = step6
-    .split("")
-    .map((c) => String.fromCharCode(c.charCodeAt(0) - 3))
-    .join("");
-  // Step 6: Final case swap, reverse, and Base64 decode
-  let step8 = step7
-    .split("")
-    .map((c) =>
-      /[a-zA-Z]/.test(c)
-        ? c === c.toLowerCase()
-          ? c.toUpperCase()
-          : c.toLowerCase()
-        : c
-    )
-    .join("");
-  let step9 = step8.split("").reverse().join("");
-  // return atob(step9);
-  let decodedUrl = atob(step9);
-  return decodedUrl;
 }
 
 

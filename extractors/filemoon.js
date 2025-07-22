@@ -41,7 +41,6 @@ async function filemoonExtractor(html, url = null) {
         const iframeResponse = await soraFetch(iframeUrl, {
             headers: {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-                "Referer": url,
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             }
         });
@@ -77,6 +76,8 @@ async function filemoonExtractor(html, url = null) {
         return null;
     }
 }
+
+/* REMOVE_START */
 
 class Unbaser {
     constructor(base) {
@@ -172,7 +173,6 @@ function unpack(source) {
 }
 
 
-/* REMOVE_START */
 /**
  * Uses Sora's fetchv2 on ipad, fallbacks to regular fetch on Windows
  * @author ShadeOfChaos
@@ -200,3 +200,4 @@ async function soraFetch(url, options = { headers: {}, method: 'GET', body: null
 /* REMOVE_END */
 
 /* SCHEME END */
+
