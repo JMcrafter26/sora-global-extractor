@@ -123,7 +123,7 @@ def get_global_extractor_github():
     print(f"{Colors.CYAN}{'='*60}{Colors.END}")
     print(f"🌐 Downloading from GitHub...")
     
-    extractorUrl = "https://raw.githubusercontent.com/JMcrafter26/sora-global-extractor/refs/heads/main/global_extractor.js"
+    extractorUrl = "https://raw.githack.com/JMcrafter26/sora-global-extractor/refs/heads/main/global_extractor.js" + "?r=" + str(random.randint(100000, 999999))
     response = requests.get(extractorUrl)
     if response.status_code == 200:
         print(f"✅ {Colors.GREEN}Download completed successfully!{Colors.END}")
