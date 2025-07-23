@@ -286,7 +286,8 @@ node global_extractor_test.js
 For detailed information about changes, improvements, and version history, see our [CHANGELOG.md](./CHANGELOG.md).
 
 **Recent Updates:**
-- **v1.1.2** (July 22, 2025): Fixed filemoon, Removed SpeedFiled (Site is offile for a while now)
+- **v1.1.3** (July 23, 2025): Added plugin support to reduce redundant code, fixed filemoon extractor
+- **v1.1.2** (July 22, 2025): Fixed filemoon, Removed SpeedFiled (Site is offline for a while now)
 - **v1.1.1** (June 17, 2025): Direct URL support, enhanced auto-updater, custom provider naming
 - **v1.1.0** (June 9, 2025): Multi-extractor support, global extractor system
 - **v1.0.0**: Initial stable release with core extractors
