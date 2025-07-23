@@ -354,16 +354,11 @@ async function test() {
     }
   });
 
-  // DEBUG ONLY: PASS ALL TESTS
+  // DEBUG ONLY: PASS ALL TESTS, because sometimes the providers are down but the extractor is still working
   // extractors = Object.keys(extractors).reduce((acc, key) => { acc[key] = "passed"; return acc; }, {});
 
-  // // if its speedfiles, let it pass (because the site is currently under maintenance, but the extractor is working)
-  // if (extractors["speedfiles"] && extractors["speedfiles"] === "failed") {
-  //   extractors["speedfiles"] = "passed";
-  // }
-  // // same for doodstream
-  // if (extractors["doodstream"] && extractors["doodstream"] === "failed") {
-  //   extractors["doodstream"] = "passed";
+  // if (extractors["vidmoly"] && extractors["vidmoly"] === "failed") {
+  //   extractors["vidmoly"] = "passed";
   // }
   
   // node only, save the test results to a file
@@ -380,6 +375,20 @@ test();
 
 /* TEST SCHEME END */
 
+
+
+////////////////////////////////////////////////
+//                 EXTRACTORS                 //
+////////////////////////////////////////////////
+
+// DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING //
+
+/* {EXTRACTOR_FUNCTIONS} */
+
+
+////////////////////////////////////////////////
+//                 PLUGINS                    //
+////////////////////////////////////////////////
 
 /**
  * Uses Sora's fetchv2 on ipad, fallbacks to regular fetch on Windows
@@ -407,12 +416,6 @@ async function soraFetch(url, options = { headers: {}, method: 'GET', body: null
     }
 }
 
-////////////////////////////////////////////////
-//                 EXTRACTORS                 //
-////////////////////////////////////////////////
-
-// DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING //
-
-/* {EXTRACTOR_FUNCTIONS} */
+/* {PLUGINS} */ 
 
 /* {GE END} */

@@ -1,60 +1,3 @@
-async function extractStreamUrl(url) {
-  try {
-    const response = await fetch(url);
-    const html = (await response.text) ? response.text() : response;
-
-    let streamUrl = null;
-    try {
-      streamUrl = await streamwishExtractor(html);
-    } catch (error) {
-      console.log("streamwish extraction error:" + error);
-    }
-
-    console.log("streamwish Stream URL: " + streamUrl);
-    if (streamUrl && streamUrl !== false && streamUrl !== null) {
-      return streamUrl;
-    }
-
-    console.log("No stream URL found");
-
-    return null;
-  } catch (error) {
-    console.log("Fetch error:", error);
-    return null;
-  }
-}
-
-/* SCHEME START */
-
-/**
- * @name streamwishExtractor
- * @author Ibro
- */
-
-async function streamwishExtractor(data, url = null) {
-    const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
-
-    const unpackedScript = unpack(obfuscatedScript[1]);
-
-    const m3u8Match = unpackedScript.match(/file:"(https?:\/\/.*?\.m3u8.*?)"/);
-
-    const m3u8Url = m3u8Match[1];
-    console.log(m3u8Url);
-    return m3u8Url;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////       Helper Functions       ////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-
-/*
-Credit to GitHub user @mnsrulz for Unpacker Node library
-
-Credits to @jcpiccodev for writing the full deobfuscator <3
-*/
-
-/* REMOVE_START */
-
 class Unbaser {
     constructor(base) {
         this.ALPHABET = {
@@ -91,9 +34,6 @@ class Unbaser {
     }
 }
 
-function detect(source) {
-    return source.replace(" ", "").startsWith("eval(function(p,a,c,k,e,");
-}
 
 function unpack(source) {
     let { payload, symtab, radix, count } = _filterargs(source);
@@ -150,6 +90,3 @@ function unpack(source) {
         return source;
     }
 }
-/* REMOVE_END */
-
-/* SCHEME END */

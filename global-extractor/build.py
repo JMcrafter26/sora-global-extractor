@@ -8,6 +8,9 @@ import re
 extractors_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'extractors')
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
+addedPlugins = []
+pluginList = []
+
 class Colors:
     RED = '\033[91m'
     GREEN = '\033[92m'
@@ -119,6 +122,21 @@ def build_extractors(functions):
                     if cls in scheme:
                         del functions[function]
                         break
+        # check for required plugins
+        # e.g. /* {REQUIRED PLUGINS: unpack} */ (plugins are separated by commas)
+        for function_name, scheme in functions.items():
+            # find the line with /* {REQUIRED PLUGINS: ...} */
+            required_plugins_line = re.search(r'/\*\s*\{REQUIRED PLUGINS:\s*([^\}]+)\}\s*\*/', scheme)
+            if required_plugins_line:
+                required_plugins = required_plugins_line.group(1).strip().split(',')
+                # remove whitespace and add to the addedPlugins list
+                required_plugins = [plugin.strip() for plugin in required_plugins]
+                for plugin in required_plugins:
+                    if plugin not in addedPlugins:
+                        addedPlugins.append(plugin)
+                        print(f"🔌 {Colors.CYAN}{function_name} requires plugin: {Colors.YELLOW}{plugin}{Colors.END}")
+
+        
         
                     
         
@@ -195,6 +213,20 @@ def build_global_extractor(functions, allowed_functions=[]):
         providers = ', '.join([function for function in functions])
         content = content.replace('/* {ALL_PROVIDERS} */', providers)
 
+        # replace the /* {PLUGINS} */ with the plugins
+        if addedPlugins:
+            print(f"🔌 {Colors.CYAN}Adding required plugins: {Colors.YELLOW}{', '.join(addedPlugins)}{Colors.END}")
+            # get file content from plugins directory
+            plugins_content = ''
+            for plugin in addedPlugins:
+                plugin_file = os.path.join(script_dir, 'plugins', plugin + '.js')
+                if os.path.exists(plugin_file):
+                    with open(plugin_file, 'r', encoding='utf-8') as pf:
+                        plugins_content += pf.read() + '\n\n'
+                else:
+                    print(f"⚠️  {Colors.YELLOW}Plugin {plugin} not found - skipping{Colors.END}")
+            content = content.replace('/* {PLUGINS} */', plugins_content)
+
         # replace the /* {PROVIDER_CASES} */ like this:
         # case "bigwarp":
         #   return bigwarpExtractor(url);
@@ -225,6 +257,8 @@ def build_global_extractor(functions, allowed_functions=[]):
             for provider in test_providers:
                 test_providers_content += provider + '\n'
             content = content.replace('/* {TEST_PROVIDERS} */', test_providers_content)
+
+        
 
         # save file to test/global_extractor_test.js
         with open(os.path.join(script_dir, 'test', 'global_extractor_test.js'), 'w', encoding='utf-8') as f:
@@ -264,7 +298,15 @@ def build(allowed_functions=[]):
         print(f"\n{Colors.CYAN}🎯 BUILDING WITH ALLOWED FUNCTIONS: {Colors.YELLOW}{allowed_functions}{Colors.END}")
     else:
         print(f"\n{Colors.CYAN}🌍 BUILDING ALL EXTRACTORS{Colors.END}")
-    
+
+    # get plugins from script directory/plugins there the plugins will be in the format of plugin_name.js
+    plugins_dir = os.path.join(script_dir, 'plugins')
+    pluginList = []
+    for plugin_file in os.listdir(plugins_dir):
+        if plugin_file.endswith('.js'):
+            pluginList.append(plugin_file[:-3])  # remove .js extension
+    print(f"🔌 {Colors.CYAN}Available plugins: {Colors.YELLOW}{pluginList}{Colors.END}")
+
     print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
     print(f"{Colors.CYAN}🚀 GLOBAL EXTRACTOR BUILD STARTED{Colors.END}")
     print(f"{Colors.CYAN}{'='*60}{Colors.END}")
