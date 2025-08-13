@@ -72,7 +72,17 @@ function globalExtractor(providers) {
       // check if streamUrl is not null, a string, and starts with http or https
       if (streamUrl && typeof streamUrl === "string" && (streamUrl.startsWith("http"))) {
         return streamUrl;
+        // if its an array, get the value that starts with http
+      } else if (Array.isArray(streamUrl)) {
+        const httpStream = streamUrl.find(url => url.startsWith("http"));
+        if (httpStream) {
+          return httpStream;
+        }
+      } else if (streamUrl || typeof streamUrl !== "string") {
+        // check if it's a valid stream URL
+        return null;
       }
+
     } catch (error) {
       // Ignore the error and try the next provider
     }
@@ -135,8 +145,14 @@ async function multiExtractor(providers) {
         console.log(`Skipping ${provider} as it has already 3 streams`);
         continue;
       }
-      const streamUrl = await extractStreamUrlByProvider(url, provider);
-      // check if streamUrl is not null, a string, and starts with http or https
+      let streamUrl = await extractStreamUrlByProvider(url, provider);
+      
+       if (streamUrl && Array.isArray(streamUrl)) {
+        const httpStream = streamUrl.find(url => url.startsWith("http"));
+        if (httpStream) {
+          streamUrl = httpStream;
+        }
+      }
       // check if provider is already in streams, if it is, add a number to it
       if (
         !streamUrl ||
@@ -191,7 +207,12 @@ async function extractStreamUrlByProvider(url, provider) {
   if(provider == 'bigwarp') {
     delete headers["User-Agent"];
     headers["x-requested-with"] = "XMLHttpRequest";
+  } else if (provider == 'vk') {
+    headers["encoding"] = "windows-1251"; // required
+  } else if (provider == 'sibnet') {
+    headers["encoding"] = "windows-1251"; // required
   }
+
   // fetch the url
   // and pass the response to the extractor function
   console.log("Fetching URL: " + url);

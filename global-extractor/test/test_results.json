@@ -6,5 +6,9 @@
   "doodstream": "passed",
   "voe": "passed",
   "vidoza": "passed",
-  "mp4upload": "passed"
+  "mp4upload": "passed",
+  "megacloud": "passed",
+  "vk": "failed",
+  "uqload": "passed",
+  "sibnet": "passed"
 }

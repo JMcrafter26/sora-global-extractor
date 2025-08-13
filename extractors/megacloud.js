@@ -41,7 +41,7 @@ async function extractStreamUrl(url) {
 
 
 // Megacloud V3 specific
-async function megacloudExtractor(embedUrl) {
+async function megacloudExtractor(html, embedUrl) {
 	const CHARSET = Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32));
 
 	const xraxParams = embedUrl.split('/').pop();
@@ -65,16 +65,28 @@ async function megacloudExtractor(embedUrl) {
 			if (!decryptedSources) throw new Error("Failed to decrypt source");
 		}
 
-		return {
-			status: true,
-			result: {
-				sources: decryptedSources,
-				tracks: rawSourceData.tracks,
-				intro: rawSourceData.intro ?? null,
-				outro: rawSourceData.outro ?? null,
-				server: rawSourceData.server ?? null
+		console.log("Decrypted sources:" + JSON.stringify(decryptedSources, null, 2));
+
+		// return the first source if it's an array
+		if (Array.isArray(decryptedSources) && decryptedSources.length > 0) {
+			try {
+				return decryptedSources[0].file;
+			} catch (error) {
+				console.log("Error extracting MegaCloud stream URL:" + error);
+				return null;
 			}
 		}
+
+		// return {
+		// 	status: true,
+		// 	result: {
+		// 		sources: decryptedSources,
+		// 		tracks: rawSourceData.tracks,
+		// 		intro: rawSourceData.intro ?? null,
+		// 		outro: rawSourceData.outro ?? null,
+		// 		server: rawSourceData.server ?? null
+		// 	}
+		// }
 	} catch (error) {
 		console.error(`[ERROR][decryptSources] Error decrypting ${embedUrl}:`, error);
 		return {

@@ -4,7 +4,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
 [![Version](https://api.jm26.net/b/Version-1.1.0-green)](./global-extractor/VERSION.json)
-[![Extractors](https://api.jm26.net/b/Extractors-8-orange)](#available-extractors)
+[![Extractors](https://api.jm26.net/b/Extractors-12-orange)](#available-extractors)
 
 ## 📋 Table of Contents
 
@@ -31,6 +31,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
     - [Running Tests](#running-tests)
     - [Contributing](#contributing)
   - [📝 Changelog](#-changelog)
+  - [TODO](#todo)
   - [📄 License](#-license)
 
 </details>
@@ -46,6 +47,11 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 
 
 ## 🚀 Quick Start
+
+> [!Note]
+> This guide assumes you have a basic understanding of JavaScript and Sora module development.
+>
+> If you are new to these concepts, consider [reading the Sora documentation](https://sora.jm26.net/docs) first.
 
 1. **Choose your integration method:**
    - Use the [Global Extractor](#-global-extractor) for multiple providers (recommended)
@@ -71,8 +77,12 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 | [📺 Vidoza](./extractors/vidoza.js) | [Cufiy](https://github.com/JMcrafter26) |
 | [📤 MP4Upload](./extractors/mp4upload.js) | [Cufiy](https://github.com/JMcrafter26) |
 | [🌙 FileMoon](./extractors/filemoon.js) | [Cufiy](https://github.com/JMcrafter26) & Churly |
+| [☁️ MegaCloud](./extractors/megacloud.js) | [ShadeOfChaos](https://github.com/ShadeOfChaos) |
+| [🎥 VK](./extractors/vk.js) | [scigward](https://github.com/scigward) |
+| [📤 UQLoad](./extractors/uqload.js) | [scigward](https://github.com/scigward) |
+| [🌐 Sibnet](./extractors/sibnet.js) | [scigward](https://github.com/scigward) |
 
-> **Note**: All extractors are asynchronous and optimized for performance. Test status is updated automatically via CI/CD pipeline.
+> **Note**: All extractors are asynchronous. You can find out more about the individual extractors in their respective files.
 
 ## 🌐 Global Extractor
 
@@ -97,12 +107,16 @@ The global extractor supports the following extractors:
 | voe | ✅ |
 | vidoza | ✅ |
 | mp4upload | ✅ |
+| megacloud | ✅ |
+| vk | ❌ |
+| uqload | ✅ |
+| sibnet | ✅ |
 
-> **Last updated**: July 23, 2025
+> **Last updated**: August 13, 2025
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 87.50% (7/8 extractors passing)
+> **Success Rate**: 83.33% (10/12 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -292,6 +306,11 @@ For detailed information about changes, improvements, and version history, see o
 - **v1.1.0** (June 9, 2025): Multi-extractor support, global extractor system
 - **v1.0.0**: Initial stable release with core extractors
 
+## TODO
+
+- [ ] Use [Better multi return array](https://sora.jm26.net/docs/modules/module-functions/extractStreamUrl.html#multi-server-selector-recommended)
+- [ ] Allow extractor to return multiple formats streams
+ 
 ## 📄 License
 
 This project is licensed under a **Custom License** that restricts usage to the **Sora/Sulfur iOS application** ecosystem only. 
