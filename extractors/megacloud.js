@@ -73,7 +73,7 @@ async function megacloudExtractor(html, embedUrl) {
 				return decryptedSources[0].file;
 			} catch (error) {
 				console.log("Error extracting MegaCloud stream URL:" + error);
-				return null;
+				return false;
 			}
 		}
 

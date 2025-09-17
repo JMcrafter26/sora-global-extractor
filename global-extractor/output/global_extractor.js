@@ -2,7 +2,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.1.4} */
+/* {VERSION: 1.1.5} */
 
 /**
  * @name global_extractor.js
@@ -10,8 +10,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2025-08-13 03:44:07
- * @version 1.1.4
+ * @date 2025-09-18 00:05:02
+ * @version 1.1.5
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -25,7 +25,7 @@ async function extractStreamUrl(url) {
     // Logic to populate providers
     // ...
     // Note: The higher up the provider is in the list, the higher the priority
-    // Available providers: bigwarp, doodstream, filemoon, megacloud, mp4upload, sibnet, uqload, vidmoly, vidoza, voe
+    // Available providers: bigwarp, dailymotion, doodstream, earnvids, filemoon, megacloud, mp4upload, sibnet, uqload, vidmoly, vidoza, voe
 
 
     // E.g.
@@ -275,11 +275,25 @@ async function extractStreamUrlByProvider(url, provider) {
          console.log("Error extracting stream URL from bigwarp:", error);
          return null;
       }
+    case "dailymotion":
+      try {
+         return await dailymotionExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from dailymotion:", error);
+         return null;
+      }
     case "doodstream":
       try {
          return await doodstreamExtractor(html, url);
       } catch (error) {
          console.log("Error extracting stream URL from doodstream:", error);
+         return null;
+      }
+    case "earnvids":
+      try {
+         return await earnvidsExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from earnvids:", error);
          return null;
       }
     case "filemoon":
@@ -375,6 +389,71 @@ async function bigwarpExtractor(videoPage, url = null) {
 }
 
 
+/* --- dailymotion --- */
+
+/**
+ * @name dailymotionExtractor
+ * @author 50/50
+ */
+async function dailymotionExtractor(html, url = null) {
+    try {
+        let videoId = null;
+        const patterns = [
+            /dailymotion\.com\/video\/([a-zA-Z0-9]+)/,          
+            /dailymotion\.com\/embed\/video\/([a-zA-Z0-9]+)/,    
+            /[?&]video=([a-zA-Z0-9]+)/                          
+        ];
+        for (const p of patterns) {
+            const match = url.match(p);
+            if (match) {
+                videoId = match[1];
+                break;
+            }
+        }
+        if (!videoId) {
+            console.log("Invalid Dailymotion URL");
+            return JSON.stringify({ streams: [], subtitles: "" });
+        }
+        const metaRes = await soraFetch(`https://www.dailymotion.com/player/metadata/video/${videoId}`);
+        const metaJson = await metaRes.json ? await metaRes.json() : JSON.parse(await metaRes);
+        const hlsLink = metaJson.qualities?.auto?.[0]?.url;
+        if (!hlsLink) return JSON.stringify({ streams: [], subtitles: "" });
+        async function getBestHls(hlsUrl) {
+            try {
+                const res = await soraFetch(hlsUrl);
+                const text = await res.text();
+                const regex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+)x(\d+).*?\n(https?:\/\/[^\n]+)/g;
+                const streams = [];
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    streams.push({ width: parseInt(match[1]), height: parseInt(match[2]), url: match[3] });
+                }
+                if (streams.length === 0) return hlsUrl;
+                streams.sort((a, b) => b.height - a.height);
+                return streams[0].url;
+            } catch {
+                return hlsUrl;
+            }
+        }
+        const bestHls = await getBestHls(hlsLink);
+        return bestHls;
+        const subtitles = metaJson.subtitles?.data?.['en-auto']?.urls?.[0] || "";
+        const result = {
+            streams: ["1080p", bestHls],
+            subtitles: subtitles
+        };
+        console.log("Extracted Dailymotion result:" + JSON.stringify(result));
+        return JSON.stringify(result);
+    } catch {
+        const empty = { streams: [], subtitles: "" };
+        console.log("Extracted Dailymotion result:" + JSON.stringify(empty));
+        return JSON.stringify(empty);
+    }
+}
+
+
+
+
 /* --- doodstream --- */
 
 /**
@@ -408,6 +487,30 @@ function randomStr(length) {
     }
     return result;
 }
+
+
+/* --- earnvids --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name earnvidsExtractor
+ * @author 50/50
+ */
+async function earnvidsExtractor(html, url = null) {
+    try {
+        const obfuscatedScript = html.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+        const unpackedScript = unpack(obfuscatedScript[1]);
+        const streamMatch = unpackedScript.match(/["'](\/stream\/[^"']+)["']/);
+        const hlsLink = streamMatch ? streamMatch[1] : null;
+        const baseUrl = url.match(/^(https?:\/\/[^/]+)/)[1];
+        console.log("HLS Link:" + baseUrl + hlsLink);
+        return baseUrl + hlsLink;
+    } catch (err) {
+        console.log(err);
+        return "https://files.catbox.moe/avolvc.mp4";
+    }
+}
+
 
 
 /* --- filemoon --- */
@@ -499,7 +602,7 @@ async function megacloudExtractor(html, embedUrl) {
 				return decryptedSources[0].file;
 			} catch (error) {
 				console.log("Error extracting MegaCloud stream URL:" + error);
-				return null;
+				return false;
 			}
 		}
 		// return {
@@ -1078,6 +1181,10 @@ class Unbaser {
     }
 }
 
+function detectUnbaser(source) {
+    /* Detects whether `source` is P.A.C.K.E.R. coded. */
+    return source.replace(" ", "").startsWith("eval(function(p,a,c,k,e,");
+}
 
 function unpack(source) {
     let { payload, symtab, radix, count } = _filterargs(source);

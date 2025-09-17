@@ -3,7 +3,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.1.4} */
+/* {VERSION: 1.1.5} */
 
 /**
  * @name global_extractor.js
@@ -11,8 +11,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2025-08-13 03:43:44
- * @version 1.1.4
+ * @date 2025-09-18 00:04:41
+ * @version 1.1.5
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -26,7 +26,7 @@ async function extractStreamUrl(url) {
     // Logic to populate providers
     // ...
     // Note: The higher up the provider is in the list, the higher the priority
-    // Available providers: bigwarp, doodstream, filemoon, megacloud, mp4upload, sibnet, streamwish, turbovid, uqload, vidmoly, vidoza, vk, voe
+    // Available providers: bigwarp, dailymotion, doodstream, earnvids, filemoon, megacloud, mp4upload, sibnet, streamwish, uqload, vidmoly, vidoza, vk, voe
 
 
     // E.g.
@@ -276,11 +276,25 @@ async function extractStreamUrlByProvider(url, provider) {
          console.log("Error extracting stream URL from bigwarp:", error);
          return null;
       }
+    case "dailymotion":
+      try {
+         return await dailymotionExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from dailymotion:", error);
+         return null;
+      }
     case "doodstream":
       try {
          return await doodstreamExtractor(html, url);
       } catch (error) {
          console.log("Error extracting stream URL from doodstream:", error);
+         return null;
+      }
+    case "earnvids":
+      try {
+         return await earnvidsExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from earnvids:", error);
          return null;
       }
     case "filemoon":
@@ -316,13 +330,6 @@ async function extractStreamUrlByProvider(url, provider) {
          return await streamwishExtractor(html, url);
       } catch (error) {
          console.log("Error extracting stream URL from streamwish:", error);
-         return null;
-      }
-    case "turbovid":
-      try {
-         return await turbovidExtractor(html, url);
-      } catch (error) {
-         console.log("Error extracting stream URL from turbovid:", error);
          return null;
       }
     case "uqload":
@@ -397,6 +404,71 @@ async function bigwarpExtractor(videoPage, url = null) {
 }
 
 
+/* --- dailymotion --- */
+
+/**
+ * @name dailymotionExtractor
+ * @author 50/50
+ */
+async function dailymotionExtractor(html, url = null) {
+    try {
+        let videoId = null;
+        const patterns = [
+            /dailymotion\.com\/video\/([a-zA-Z0-9]+)/,          
+            /dailymotion\.com\/embed\/video\/([a-zA-Z0-9]+)/,    
+            /[?&]video=([a-zA-Z0-9]+)/                          
+        ];
+        for (const p of patterns) {
+            const match = url.match(p);
+            if (match) {
+                videoId = match[1];
+                break;
+            }
+        }
+        if (!videoId) {
+            console.log("Invalid Dailymotion URL");
+            return JSON.stringify({ streams: [], subtitles: "" });
+        }
+        const metaRes = await soraFetch(`https://www.dailymotion.com/player/metadata/video/${videoId}`);
+        const metaJson = await metaRes.json ? await metaRes.json() : JSON.parse(await metaRes);
+        const hlsLink = metaJson.qualities?.auto?.[0]?.url;
+        if (!hlsLink) return JSON.stringify({ streams: [], subtitles: "" });
+        async function getBestHls(hlsUrl) {
+            try {
+                const res = await soraFetch(hlsUrl);
+                const text = await res.text();
+                const regex = /#EXT-X-STREAM-INF:.*RESOLUTION=(\d+)x(\d+).*?\n(https?:\/\/[^\n]+)/g;
+                const streams = [];
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    streams.push({ width: parseInt(match[1]), height: parseInt(match[2]), url: match[3] });
+                }
+                if (streams.length === 0) return hlsUrl;
+                streams.sort((a, b) => b.height - a.height);
+                return streams[0].url;
+            } catch {
+                return hlsUrl;
+            }
+        }
+        const bestHls = await getBestHls(hlsLink);
+        return bestHls;
+        const subtitles = metaJson.subtitles?.data?.['en-auto']?.urls?.[0] || "";
+        const result = {
+            streams: ["1080p", bestHls],
+            subtitles: subtitles
+        };
+        console.log("Extracted Dailymotion result:" + JSON.stringify(result));
+        return JSON.stringify(result);
+    } catch {
+        const empty = { streams: [], subtitles: "" };
+        console.log("Extracted Dailymotion result:" + JSON.stringify(empty));
+        return JSON.stringify(empty);
+    }
+}
+
+
+
+
 /* --- doodstream --- */
 
 /**
@@ -430,6 +502,30 @@ function randomStr(length) {
     }
     return result;
 }
+
+
+/* --- earnvids --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name earnvidsExtractor
+ * @author 50/50
+ */
+async function earnvidsExtractor(html, url = null) {
+    try {
+        const obfuscatedScript = html.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+        const unpackedScript = unpack(obfuscatedScript[1]);
+        const streamMatch = unpackedScript.match(/["'](\/stream\/[^"']+)["']/);
+        const hlsLink = streamMatch ? streamMatch[1] : null;
+        const baseUrl = url.match(/^(https?:\/\/[^/]+)/)[1];
+        console.log("HLS Link:" + baseUrl + hlsLink);
+        return baseUrl + hlsLink;
+    } catch (err) {
+        console.log(err);
+        return "https://files.catbox.moe/avolvc.mp4";
+    }
+}
+
 
 
 /* --- filemoon --- */
@@ -521,7 +617,7 @@ async function megacloudExtractor(html, embedUrl) {
 				return decryptedSources[0].file;
 			} catch (error) {
 				console.log("Error extracting MegaCloud stream URL:" + error);
-				return null;
+				return false;
 			}
 		}
 		// return {
@@ -883,97 +979,6 @@ Credits to @jcpiccodev for writing the full deobfuscator <3
 
 
 
-/* --- turbovid --- */
-
-/**
- * @name turbovidExtractor
- * @author Cufiy
- */
-async function turbovidExtractor(html, url = null) {
-  const embedUrl = url;
-  // 1. Extract critical variables from embed page
-  const { mediaType, apKey, xxId } = await extractEmbedVariables(html);
-  console.log(
-    "mediaType:" + mediaType + " | apKey:" + apKey + " | xxId:" + xxId
-  );
-  // 2. Get decryption keys
-  const juiceKeys = await fetchJuiceKeys(embedUrl);
-  console.log("juiceKeys: " + juiceKeys.juice);
-  // 3. Get encrypted video payload
-  const encryptedPayload = await fetchEncryptedPayload(embedUrl, apKey, xxId);
- 
-  // 4. Decrypt and return final url
-  const streamUrl = xorDecryptHex(encryptedPayload, juiceKeys.juice);
-  console.log("streamUrl: " + streamUrl);
-  // 5. Return the final stream URL
-  return streamUrl;
-}
-//   HELPERS
-async function extractEmbedVariables(html) {
-  return {
-    mediaType: getJsVarValue(html, "media_type"),
-    // posterPath: getJsVarValue(html, 'posterPath'),
-    apKey: getJsVarValue(html, "apkey"),
-    dKey: getJsVarValue(html, "dakey"),
-    xxId: getJsVarValue(html, "xxid"),
-    xyId: getJsVarValue(html, "xyid"),
-  };
-}
-function getJsVarValue(html, varName) {
-  const regex = new RegExp(`const ${varName}\\s*=\\s*"([^"]+)`);
-  const match = html.match(regex);
-  return match ? match[1] : null;
-}
-async function fetchJuiceKeys(embedUrl) {
-  const fetchUrl =
-    atob("aHR0cHM6Ly90dXJib3ZpZC5ldS9hcGkvY3Vja2VkLw==") + "juice_key";
-  const response = await fetch(fetchUrl, {
-    headers: {
-      method: "GET",
-      referer: embedUrl,
-    },
-  });
-  console.log("fetchJuiceKeys response:", response.status);
-  // save entire response to file  
-  return await response.json() || await JSON.parse(response);
-}
-async function fetchEncryptedPayload(embedUrl, apKey, xxId) {
-  const url =
-    atob("aHR0cHM6Ly90dXJib3ZpZC5ldS9hcGkvY3Vja2VkLw==") +
-    "the_juice_v2/?" +
-    apKey +
-    "=" +
-    xxId;
-  console.log("url:", url);
-  const response = await fetch(url, {
-    headers: {
-      method: "GET",
-      referer: embedUrl,
-    },
-  });
-  console.log("fetchEncryptedPayload response:", response.status);
-  const data = await response.json() || await JSON.parse(response);
-  return data.data;
-}
-function xorDecryptHex(hexData, key) {
-  if (!hexData) {
-    throw new Error("hexData is undefined or null");
-  }
-  const buffer = new Uint8Array(
-    hexData
-      .toString()
-      .match(/../g)
-      .map((h) => parseInt(h, 16))
-  );
-  let decrypted = "";
-  for (let i = 0; i < buffer.length; i++) {
-    const keyByte = key.charCodeAt(i % key.length);
-    decrypted += String.fromCharCode(buffer[i] ^ keyByte);
-  }
-  return decrypted;
-}
-
-
 /* --- uqload --- */
 
 /**
@@ -1236,6 +1241,10 @@ class Unbaser {
     }
 }
 
+function detectUnbaser(source) {
+    /* Detects whether `source` is P.A.C.K.E.R. coded. */
+    return source.replace(" ", "").startsWith("eval(function(p,a,c,k,e,");
+}
 
 function unpack(source) {
     let { payload, symtab, radix, count } = _filterargs(source);

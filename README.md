@@ -4,7 +4,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
 [![Version](https://api.jm26.net/b/Version-1.1.0-green)](./global-extractor/VERSION.json)
-[![Extractors](https://api.jm26.net/b/Extractors-12-orange)](#available-extractors)
+[![Extractors](https://api.jm26.net/b/Extractors-13-orange)](#available-extractors)
 
 ## 📋 Table of Contents
 
@@ -81,6 +81,8 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 | [🎥 VK](./extractors/vk.js) | [scigward](https://github.com/scigward) |
 | [📤 UQLoad](./extractors/uqload.js) | [scigward](https://github.com/scigward) |
 | [🌐 Sibnet](./extractors/sibnet.js) | [scigward](https://github.com/scigward) |
+| [💰 EarnVids](./extractors/earnvids.js) | [50/50](https://github.com/50n50) |
+| [▶️ Dailymotion](./extractors/dailymotion.js) | [50/50](https://github.com/50n50) |
 
 > **Note**: All extractors are asynchronous. You can find out more about the individual extractors in their respective files.
 
@@ -100,7 +102,6 @@ The global extractor supports the following extractors:
 | Extractor | Test Passed |
 | -------- | ------- |
 | vidmoly | ✅ |
-| turbovid | ❌ |
 | bigwarp | ✅ |
 | filemoon | ✅ |
 | doodstream | ✅ |
@@ -111,12 +112,14 @@ The global extractor supports the following extractors:
 | vk | ❌ |
 | uqload | ✅ |
 | sibnet | ✅ |
+| earnvids | ✅ |
+| dailymotion | ✅ |
 
-> **Last updated**: August 13, 2025
+> **Last updated**: September 18, 2025
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 83.33% (10/12 extractors passing)
+> **Success Rate**: 92.31% (12/13 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -300,6 +303,9 @@ node global_extractor_test.js
 For detailed information about changes, improvements, and version history, see our [CHANGELOG.md](./CHANGELOG.md).
 
 **Recent Updates:**
+
+- **v1.1.5** (September 18, 2025): Added Dailymotion and Earnvids extractors, removed Turbovid, improved error handling
+- **v1.1.4** (August 13, 2025): Added Megacloud, Sibnet, UQLoad, and VK extractors, improved logging
 - **v1.1.3** (July 23, 2025): Added plugin support to reduce redundant code, fixed filemoon extractor
 - **v1.1.2** (July 22, 2025): Fixed filemoon, Removed SpeedFiled (Site is offline for a while now)
 - **v1.1.1** (June 17, 2025): Direct URL support, enhanced auto-updater, custom provider naming
@@ -310,6 +316,8 @@ For detailed information about changes, improvements, and version history, see o
 
 - [ ] Use [Better multi return array](https://sora.jm26.net/docs/modules/module-functions/extractStreamUrl.html#multi-server-selector-recommended)
 - [ ] Allow extractor to return multiple formats streams
+- [ ] Subtitle support
+- [ ] Add more extractors
  
 ## 📄 License
 

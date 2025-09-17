@@ -1,6 +1,5 @@
 {
   "vidmoly": "passed",
-  "turbovid": "failed",
   "bigwarp": "passed",
   "filemoon": "passed",
   "doodstream": "passed",
@@ -10,5 +9,7 @@
   "megacloud": "passed",
   "vk": "failed",
   "uqload": "passed",
-  "sibnet": "passed"
+  "sibnet": "passed",
+  "earnvids": "passed",
+  "dailymotion": "passed"
 }
