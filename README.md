@@ -4,7 +4,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
 [![Version](https://api.jm26.net/b/Version-1.1.0-green)](./global-extractor/VERSION.json)
-[![Extractors](https://api.jm26.net/b/Extractors-13-orange)](#available-extractors)
+[![Extractors](https://api.jm26.net/b/Extractors-21-orange)](#available-extractors)
 
 ## 📋 Table of Contents
 
@@ -83,6 +83,16 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 | [🌐 Sibnet](./extractors/sibnet.js) | [scigward](https://github.com/scigward) |
 | [💰 EarnVids](./extractors/earnvids.js) | [50/50](https://github.com/50n50) |
 | [▶️ Dailymotion](./extractors/dailymotion.js) | [50/50](https://github.com/50n50) |
+| [📁 FourShared](./extractors/new/fourshared.js) | [50/50](https://github.com/50n50) |
+| [📤 OneUpload](./extractors/new/oneupload.js) | [50/50](https://github.com/50n50) |
+| [🎞️ PlayerWish](./extractors/new/playerwish.js) | [50/50](https://github.com/50n50) |
+| [📽️ SendVid](./extractors/new/sendvid.js) | [50/50](https://github.com/50n50) |
+| [🌊 SmoothPre](./extractors/new/smoothpre.js) | [50/50](https://github.com/50n50) |
+| [🎬 SuperVideo](./extractors/new/supervideo.js) | [50/50](https://github.com/50n50) |
+| [📤 UploadCX](./extractors/new/uploadcx.js) | [50/50](https://github.com/50n50) |
+| [🎦 VideosPK](./extractors/new/videospk.js) | [50/50](https://github.com/50n50) |
+| [🌟 StreamUp](./extractors/streamup.js) | [Cufiy](https://github.com/JMcrafter26) |
+| [🍓 LuluStream](./extractors/lulustream.js) | [Cufiy](https://github.com/JMcrafter26) |
 
 > **Note**: All extractors are asynchronous. You can find out more about the individual extractors in their respective files.
 
@@ -108,18 +118,26 @@ The global extractor supports the following extractors:
 | voe | ✅ |
 | vidoza | ✅ |
 | mp4upload | ✅ |
-| megacloud | ✅ |
+| megacloud | ❌ |
 | vk | ❌ |
 | uqload | ✅ |
 | sibnet | ✅ |
 | earnvids | ✅ |
-| dailymotion | ✅ |
+| dailymotion | ❌ |
+| oneupload | ❌ |
+| sendvid | ✅ |
+| smoothpre | ❌ |
+| supervideo | ✅ |
+| uploadcx | ✅ |
+| videospk | ✅ |
+| streamup | ✅ |
+| lulustream | ✅ |
 
-> **Last updated**: September 18, 2025
+> **Last updated**: October 29, 2025
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 92.31% (12/13 extractors passing)
+> **Success Rate**: 76.19% (16/21 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -304,6 +322,7 @@ For detailed information about changes, improvements, and version history, see o
 
 **Recent Updates:**
 
+- **v1.1.6** (October 29, 2025): Added 4shared, LuluStream, OneUpload, PlayerWish, SendVid, SmoothPre, StreamUp, SuperVideo, UploadCX, VideosPK extractors
 - **v1.1.5** (September 18, 2025): Added Dailymotion and Earnvids extractors, removed Turbovid, improved error handling
 - **v1.1.4** (August 13, 2025): Added Megacloud, Sibnet, UQLoad, and VK extractors, improved logging
 - **v1.1.3** (July 23, 2025): Added plugin support to reduce redundant code, fixed filemoon extractor

@@ -444,6 +444,11 @@ if __name__ == "__main__":
     test_results = test()
     print(f"🧪 {Colors.GREEN}Test completed successfully!{Colors.END}")
 
+    # if --wait is passed as an argument, wait for user input before proceeding
+    import sys
+    if '--wait' in sys.argv:
+        input(f"\n⏸️  {Colors.YELLOW}Press Enter to continue to production build...{Colors.END}")
+
     allowed_functions = []
     # add the passed extractors to the allowed functions
     for provider, result in test_results.items():

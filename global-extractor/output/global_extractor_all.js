@@ -3,7 +3,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.1.5} */
+/* {VERSION: 1.1.6} */
 
 /**
  * @name global_extractor.js
@@ -11,8 +11,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2025-09-18 00:04:41
- * @version 1.1.5
+ * @date 2025-10-29 03:41:45
+ * @version 1.1.6
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -26,7 +26,7 @@ async function extractStreamUrl(url) {
     // Logic to populate providers
     // ...
     // Note: The higher up the provider is in the list, the higher the priority
-    // Available providers: bigwarp, dailymotion, doodstream, earnvids, filemoon, megacloud, mp4upload, sibnet, streamwish, uqload, vidmoly, vidoza, vk, voe
+    // Available providers: bigwarp, dailymotion, doodstream, earnvids, filemoon, fourshared, lulustream, megacloud, mp4upload, oneupload, playerwish, sendvid, sibnet, smoothpre, streamup, streamwish, supervideo, uploadcx, uqload, videospk, vidmoly, vidoza, vk, voe
 
 
     // E.g.
@@ -223,6 +223,8 @@ async function extractStreamUrlByProvider(url, provider) {
     headers["encoding"] = "windows-1251"; // required
   } else if (provider == 'sibnet') {
     headers["encoding"] = "windows-1251"; // required
+  } else if (provider == 'supervideo') {
+    delete headers["User-Agent"];
   }
 
   // fetch the url
@@ -304,6 +306,20 @@ async function extractStreamUrlByProvider(url, provider) {
          console.log("Error extracting stream URL from filemoon:", error);
          return null;
       }
+    case "fourshared":
+      try {
+         return await foursharedExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from fourshared:", error);
+         return null;
+      }
+    case "lulustream":
+      try {
+         return await lulustreamExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from lulustream:", error);
+         return null;
+      }
     case "megacloud":
       try {
          return await megacloudExtractor(html, url);
@@ -318,11 +334,46 @@ async function extractStreamUrlByProvider(url, provider) {
          console.log("Error extracting stream URL from mp4upload:", error);
          return null;
       }
+    case "oneupload":
+      try {
+         return await oneuploadExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from oneupload:", error);
+         return null;
+      }
+    case "playerwish":
+      try {
+         return await playerwishExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from playerwish:", error);
+         return null;
+      }
+    case "sendvid":
+      try {
+         return await sendvidExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from sendvid:", error);
+         return null;
+      }
     case "sibnet":
       try {
          return await sibnetExtractor(html, url);
       } catch (error) {
          console.log("Error extracting stream URL from sibnet:", error);
+         return null;
+      }
+    case "smoothpre":
+      try {
+         return await smoothpreExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from smoothpre:", error);
+         return null;
+      }
+    case "streamup":
+      try {
+         return await streamupExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from streamup:", error);
          return null;
       }
     case "streamwish":
@@ -332,11 +383,32 @@ async function extractStreamUrlByProvider(url, provider) {
          console.log("Error extracting stream URL from streamwish:", error);
          return null;
       }
+    case "supervideo":
+      try {
+         return await supervideoExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from supervideo:", error);
+         return null;
+      }
+    case "uploadcx":
+      try {
+         return await uploadcxExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from uploadcx:", error);
+         return null;
+      }
     case "uqload":
       try {
          return await uqloadExtractor(html, url);
       } catch (error) {
          console.log("Error extracting stream URL from uqload:", error);
+         return null;
+      }
+    case "videospk":
+      try {
+         return await videospkExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from videospk:", error);
          return null;
       }
     case "vidmoly":
@@ -468,7 +540,6 @@ async function dailymotionExtractor(html, url = null) {
 
 
 
-
 /* --- doodstream --- */
 
 /**
@@ -582,6 +653,49 @@ async function filemoonExtractor(html, url = null) {
 }
 
 
+
+
+/* --- fourshared --- */
+
+/**
+ * @name foursharedExtractor
+ * @author 50/50
+ */
+async function foursharedExtractor(data, url = null) {
+    try {
+        // Try to extract from iframe embed first
+        const match = data.match(/<iframe[^>]+src="(https:\/\/www\.4shared\.com\/web\/embed\/file\/[^"]+)"/i);
+        if (match && match[1]) {
+            const videoEmbedUrl = match[1].trim();
+            const response2 = await fetchv2(videoEmbedUrl);
+            const html2 = await response2.text();
+            const match2 = html2.match(/<source[^>]+src="([^"]+)"[^>]*type="video\/mp4"/i);
+            if (match2 && match2[1]) {
+                return match2[1].trim();
+            }
+        }
+        // Fallback: try to extract directly from the page
+        const match2 = data.match(/<source[^>]+src="([^"]+)"[^>]*type="video\/mp4"/i);
+        return match2 && match2[1] ? match2[1].trim() : "No stream found";
+    } catch (error) {
+        console.log("extract4Shared error:", error);
+        return "No stream found";
+    }
+}
+
+
+/* --- lulustream --- */
+
+/**
+ * @name LuluStream Extractor
+ * @author Cufiy
+ */
+async function lulustreamExtractor(data, url = null) {
+  const scriptRegex = /sources:\s*\[\{file:"([^"]+)"/;
+  const scriptMatch = scriptRegex.exec(data);
+  const decoded = scriptMatch ? scriptMatch[1] : false;
+  return decoded;
+}
 
 
 /* --- megacloud --- */
@@ -929,6 +1043,49 @@ async function mp4uploadExtractor(html, url = null) {
 }
 
 
+/* --- oneupload --- */
+
+/**
+ * @name oneuploadExtractor
+ * @author 50/50
+ */
+async function oneuploadExtractor(data, url = null) {
+    const match = data.match(/sources:\s*\[\{file:"([^"]+)"\}\]/);
+    const fileUrl = match ? match[1] : null;
+    return fileUrl;
+}
+
+
+/* --- playerwish --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name playwishExtractor
+ * @author 50/50
+ */
+async function playwishExtractor(data, url = null) {
+    const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+    const unpackedScript = unpack(obfuscatedScript[1]);
+    const m3u8Match = unpackedScript.match(/"hls2"\s*:\s*"([^"]+)"/);
+    const m3u8Url = m3u8Match[1];
+    return m3u8Url;
+}
+
+
+
+/* --- sendvid --- */
+
+/**
+ * @name sendvidExtractor
+ * @author 50/50
+ */
+async function sendvidExtractor(data, url = null) {
+    const match = data.match(/var\s+video_source\s*=\s*"([^"]+)"/);
+    const videoUrl = match ? match[1] : null;
+    return videoUrl;
+}
+
+
 /* --- sibnet --- */
 
 /**
@@ -950,6 +1107,57 @@ async function sibnetExtractor(html, embedUrl) {
         return videoUrl;
     } catch (error) {
         console.log("SibNet extractor error: " + error.message);
+        return null;
+    }
+}
+
+
+/* --- smoothpre --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name SmoothPre Extractor
+ * @author 50/50
+ */
+async function smoothpreExtractor(data, url = null) {
+    console.log("Using SmoothPre Extractor");
+    console.log("Data Length: " + data.length);
+    const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+    if (!obfuscatedScript || !obfuscatedScript[1]) {
+        console.log("No obfuscated script found");
+        return null;
+    }
+    const unpackedScript = unpack(obfuscatedScript[1]);
+
+    const hls2Match = unpackedScript.match(/"hls2"\s*:\s*"([^"]+)"/);
+    const hls2Url = hls2Match ? hls2Match[1] : null;
+    return hls2Url;
+}
+
+
+
+
+/* --- streamup --- */
+
+/**
+ * @name StreamUp Extractor
+ * @author Cufiy
+ */
+async function streamupExtractor(data, url = null) {
+    // if url ends with /, remove it
+    if (url.endsWith("/")) {
+        url = url.slice(0, -1);
+    }
+    // split the url by / and get the last part
+    const urlParts = url.split("/");
+    const videoId = urlParts[urlParts.length - 1];
+    const apiUrl = `https://strmup.to/ajax/stream?filecode=${videoId}`;
+    const response = await soraFetch(apiUrl);
+    const jsonData = await response.json();
+    if (jsonData && jsonData.streaming_url) {
+        return jsonData.streaming_url;
+    } else {
+        console.log("No streaming URL found in the response.");
         return null;
     }
 }
@@ -979,6 +1187,40 @@ Credits to @jcpiccodev for writing the full deobfuscator <3
 
 
 
+/* --- supervideo --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name SuperVideo Extractor
+ * @author 50/50
+ */
+async function supervideoExtractor(data, url = null) {
+        const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+        const unpackedScript = unpack(obfuscatedScript[1]);
+        const regex = /file:\s*"([^"]+\.m3u8)"/;
+        const match = regex.exec(unpackedScript);
+        if (match) {
+            const fileUrl = match[1];
+            console.log("File URL:" + fileUrl);
+            return fileUrl;
+        }
+        return "No stream found";
+}
+
+
+
+/* --- uploadcx --- */
+
+/**
+ * @name UploadCx Extractor
+ * @author 50/50
+ */
+async function uploadcxExtractor(data, url = null) {
+    const mp4Match = /sources:\s*\["([^"]+\.mp4)"]/i.exec(data);
+    return mp4Match ? mp4Match[1] : null;
+}
+
+
 /* --- uqload --- */
 
 /**
@@ -995,6 +1237,23 @@ async function uqloadExtractor(html, embedUrl) {
         return null;
     }
 }
+
+
+/* --- videospk --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name videospkExtractor
+ * @author 50/50
+ */
+async function videospkExtractor(data, url = null) {
+        const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+        const unpackedScript = unpack(obfuscatedScript[1]);
+        const streamMatch = unpackedScript.match(/["'](\/stream\/[^"']+)["']/);
+        const hlsLink = streamMatch ? streamMatch[1] : null;
+        return "https://videospk.xyz" + hlsLink;
+}
+
 
 
 /* --- vidmoly --- */
@@ -1205,6 +1464,12 @@ async function soraFetch(url, options = { headers: {}, method: 'GET', body: null
     }
 }
 
+
+/***********************************************************
+ * UNPACKER MODULE
+ * Credit to GitHub user "mnsrulz" for Unpacker Node library
+ * https://github.com/mnsrulz/unpacker
+ ***********************************************************/
 class Unbaser {
     constructor(base) {
         this.ALPHABET = {

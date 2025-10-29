@@ -6,10 +6,18 @@
   "voe": "passed",
   "vidoza": "passed",
   "mp4upload": "passed",
-  "megacloud": "passed",
+  "megacloud": "failed",
   "vk": "failed",
   "uqload": "passed",
   "sibnet": "passed",
   "earnvids": "passed",
-  "dailymotion": "passed"
+  "dailymotion": "failed",
+  "oneupload": "failed",
+  "sendvid": "passed",
+  "smoothpre": "failed",
+  "supervideo": "passed",
+  "uploadcx": "passed",
+  "videospk": "passed",
+  "streamup": "passed",
+  "lulustream": "passed"
 }

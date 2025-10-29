@@ -211,6 +211,8 @@ async function extractStreamUrlByProvider(url, provider) {
     headers["encoding"] = "windows-1251"; // required
   } else if (provider == 'sibnet') {
     headers["encoding"] = "windows-1251"; // required
+  } else if (provider == 'supervideo') {
+    delete headers["User-Agent"];
   }
 
   // fetch the url
@@ -333,7 +335,9 @@ async function test() {
   // count the number of valid streamUrls
   let validCount = 0;
   streamUrls.forEach((item) => {
-    if (item.streamUrl && item.streamUrl.startsWith("http")) {
+    if (item.streamUrl &&
+      typeof item.streamUrl === "string" &&
+      item.streamUrl.startsWith("http")) {
       validCount++;
     }
   });
@@ -348,6 +352,7 @@ async function test() {
         if (
           item.streamUrl === null ||
           !item.streamUrl ||
+          typeof item.streamUrl !== "string" ||
           !item.streamUrl.startsWith("http")
         ) {
           console.log(
@@ -368,14 +373,16 @@ async function test() {
   // make an array of the extractors and their test results
   let extractors = {};
   streamUrls.forEach((item) => {
-    if (item.streamUrl && item.streamUrl.startsWith("http")) {
+    if (item.streamUrl && 
+      typeof item.streamUrl === "string" &&
+      item.streamUrl.startsWith("http")) {
       extractors[item.provider] = "passed";
     } else {
       extractors[item.provider] = "failed";
     }
   });
 
-  // DEBUG ONLY: PASS ALL TESTS, because sometimes the providers are down but the extractor is still working
+  // DEBUG ONLY: PASS ALL TESTS
   // extractors = Object.keys(extractors).reduce((acc, key) => { acc[key] = "passed"; return acc; }, {});
 
   // if (extractors["vidmoly"] && extractors["vidmoly"] === "failed") {

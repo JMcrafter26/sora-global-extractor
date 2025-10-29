@@ -92,6 +92,7 @@ async function dailymotionExtractor(html, url = null) {
 }
 
 
+/* SCHEME END */
 
 /* REMOVE_START */
 
@@ -121,5 +122,4 @@ async function soraFetch(url, options = { headers: {}, method: 'GET', body: null
 }
 /* REMOVE_END */
 
-/* SCHEME END */
 
