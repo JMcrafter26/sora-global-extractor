@@ -128,7 +128,7 @@ The global extractor supports the following extractors:
 | voe | ✅ |
 | vidoza | ✅ |
 | mp4upload | ✅ |
-| megacloud | ❌ |
+| megacloud | ✅ |
 | vk | ❌ |
 | uqload | ✅ |
 | sibnet | ✅ |
@@ -148,7 +148,7 @@ The global extractor supports the following extractors:
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 77.27% (17/22 extractors passing)
+> **Success Rate**: 81.82% (18/22 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -342,6 +342,7 @@ For detailed information about changes, improvements, and version history, see o
 
 **Recent Updates:**
 
+- **v1.1.8** (November 12, 2025): Fixed VK extractor, improved error handling
 - **v1.1.7** (November 5, 2025): Added StreamTape extractor
 - **v1.1.6** (October 29, 2025): Added 4shared, LuluStream, OneUpload, PlayerWish, SendVid, SmoothPre, StreamUp, SuperVideo, UploadCX, VideosPK extractors
 - **v1.1.5** (September 18, 2025): Added Dailymotion and Earnvids extractors, removed Turbovid, improved error handling

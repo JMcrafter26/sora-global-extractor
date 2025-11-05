@@ -3,7 +3,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.1.7} */
+/* {VERSION: 1.1.8} */
 
 /**
  * @name global_extractor.js
@@ -11,8 +11,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2025-11-05 13:41:29
- * @version 1.1.7
+ * @date 2025-11-05 15:44:24
+ * @version 1.1.8
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -31,10 +31,10 @@ async function extractStreamUrl(url) {
 
     // E.g.
     // providers = {
-    //   "https://vidmoly.to/embed-preghvoypr2m.html": "vidmoly",
-    //   "https://speedfiles.net/40d98cdccf9c": "speedfiles",
+    //   "https://vidmoly.to/embed-4321bca.html": "vidmoly",
+    //   "https://speedfiles.net/1234abc": "speedfiles",
     //   "https://example.com/video.mp4": "direct-SomeName", // this will add the url to the streams array directly, you can customize the name after the "direct-" prefix
-    //   "https://speedfiles.net/82346fs": "speedfiles-2", // you can also add a name or a number to the provider, this will be used as the name in the streams array
+    //   "https://speedfiles.net/9876bca": "speedfiles-2", // you can also add a name or a number to the provider, this will be used as the name in the streams array
     // };
 
     // Choose one of the following:
@@ -714,16 +714,28 @@ async function lulustreamExtractor(data, url = null) {
 
 // Megacloud V3 specific
 async function megacloudExtractor(html, embedUrl) {
+	// TESTING ONLY START
+	const testcase = '/api/static';
+	if(embedUrl.slice(-testcase.length) == testcase) {
+		try {
+			const response = await soraFetch(embedUrl, { method: 'GET', headers: { "referer": "https://megacloud.blog/" } });
+			embedUrl = response.url;
+		} catch (error) {
+			throw new Error("[TESTING ONLY] Megacloud extraction error:", error);
+		}
+	}
+	// TESTING ONLY END
 	const CHARSET = Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32));
 	const xraxParams = embedUrl.split('/').pop();
 	const xrax = xraxParams.includes('?') ? xraxParams.split('?')[0] : xraxParams;
 	const nonce = await getNonce(embedUrl);
 	// return decrypt(secretKey, nonce, encryptedText);
 	try {
-		const response = await fetch(`https://megacloud.blog/embed-2/v3/e-1/getSources?id=${xrax}&_k=${nonce}`);
+		const response = await soraFetch(`https://megacloud.blog/embed-2/v3/e-1/getSources?id=${xrax}&_k=${nonce}`, { method: 'GET', headers: { "referer": "https://megacloud.blog/" } });
 		const rawSourceData = await response.json();
 		const encrypted = rawSourceData?.sources;
 		let decryptedSources = null;
+		// console.log('rawSourceData', rawSourceData);
 		if (rawSourceData?.encrypted == false) {
 			decryptedSources = rawSourceData.sources;
 		}
@@ -731,7 +743,7 @@ async function megacloudExtractor(html, embedUrl) {
 			decryptedSources = await getDecryptedSourceV3(encrypted, nonce);
 			if (!decryptedSources) throw new Error("Failed to decrypt source");
 		}
-		console.log("Decrypted sources:" + JSON.stringify(decryptedSources, null, 2));
+		// console.log("Decrypted sources:" + JSON.stringify(decryptedSources, null, 2));
 		// return the first source if it's an array
 		if (Array.isArray(decryptedSources) && decryptedSources.length > 0) {
 			try {
@@ -928,7 +940,7 @@ async function megacloudExtractor(html, embedUrl) {
    * @returns {string|null} The extracted nonce, or null if it couldn't be found
    */
 	async function getNonce(embedUrl) {
-		const res = await fetch(embedUrl, { headers: { "referer": "https://anicrush.to/", "x-requested-with": "XMLHttpRequest" } });
+		const res = await soraFetch(embedUrl, { headers: { "referer": "https://anicrush.to/", "x-requested-with": "XMLHttpRequest" } });
 		const html = await res.text();
 		const match0 = html.match(/\<meta[\s\S]*?name="_gg_fb"[\s\S]*?content="([\s\S]*?)">/);
 		if (match0?.[1]) {
@@ -1011,10 +1023,10 @@ async function megacloudExtractor(html, embedUrl) {
 		}
 		return keys;
 	}
-	function fetchKey(name, url, timeout = 1000) {
+	function fetchKey(name, url) {
 		return new Promise(async (resolve) => {
 			try {
-				const response = await fetch(url, { method: 'get', timeout: timeout });
+				const response = await soraFetch(url, { method: 'get' });
 				const key = await response.text();
 				let trueKey = null;
 				try {

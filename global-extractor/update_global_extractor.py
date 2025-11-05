@@ -1,7 +1,7 @@
 """
 @name: update_global_extractor.py
 @description: A script to update global extractor files in a project.
-@version: 1.0.0
+@version: 1.1.0
 @author: JMcrafter26
 @license: MIT License
 """
@@ -10,8 +10,9 @@ import os
 import requests
 import re
 import random
+import json
 
-updaterVersion = "1.0.1"
+updaterVersion = "1.1.0"
 latestVersionNumber = None
 awaitingUpdateFiles = []
 class Colors:
@@ -33,6 +34,193 @@ def get_latest_version_number():
         data = response.json()
         return data
     return None
+
+def parse_version(version_str):
+    """Parse version string and extract numeric version parts."""
+    # Match common version patterns: 1.0.0, 1.0, 1, 1.0.0.0, etc.
+    match = re.search(r'(\d+(\.\d+)*)', str(version_str))
+    if match:
+        return match.group(1)
+    return None
+
+def compare_versions(version1, version2):
+    """Compare two version strings. Returns: -1 if v1 < v2, 0 if equal, 1 if v1 > v2"""
+    v1_parts = [int(x) for x in str(version1).split('.')]
+    v2_parts = [int(x) for x in str(version2).split('.')]
+    
+    # Pad shorter version with zeros
+    max_len = max(len(v1_parts), len(v2_parts))
+    v1_parts.extend([0] * (max_len - len(v1_parts)))
+    v2_parts.extend([0] * (max_len - len(v2_parts)))
+    
+    for i in range(max_len):
+        if v1_parts[i] < v2_parts[i]:
+            return -1
+        elif v1_parts[i] > v2_parts[i]:
+            return 1
+    return 0
+
+def increment_version(version_str):
+    """Increment the patch version number."""
+    original = str(version_str)
+    version_part = parse_version(original)
+    
+    if not version_part:
+        return None, "No valid version number found"
+    
+    # Split version into parts
+    parts = version_part.split('.')
+    
+    # Increment the last part (patch version)
+    try:
+        parts[-1] = str(int(parts[-1]) + 1)
+    except ValueError:
+        return None, "Invalid version format"
+    
+    new_version = '.'.join(parts)
+    
+    # If original had text, preserve it by replacing the numeric part
+    if version_part != original:
+        new_full_version = original.replace(version_part, new_version)
+        return new_full_version, None
+    
+    return new_version, None
+
+def find_json_for_script(script_path):
+    """Find the corresponding JSON file for a specific script file."""
+    script_filename = os.path.basename(script_path)
+    script_dir = os.path.dirname(script_path)
+    
+    # Search order: same dir -> parent dir -> 2 levels up max
+    search_dirs = [
+        script_dir,
+        os.path.dirname(script_dir),
+        os.path.dirname(os.path.dirname(script_dir))
+    ]
+    
+    # Remove duplicates and ensure we don't go outside project
+    project_root = os.getcwd()
+    search_dirs = [d for d in search_dirs if d.startswith(project_root)]
+    search_dirs = list(dict.fromkeys(search_dirs))  # Remove duplicates, preserve order
+    
+    for search_dir in search_dirs:
+        # First, check the immediate directory for JSON files
+        try:
+            files = os.listdir(search_dir)
+            for filename in files:
+                if filename.endswith('.json'):
+                    # if filename ends with .dev.json, .test.json, .tmp.json or .temp.json, skip it
+                    if re.search(r'\.(dev|test|tmp|temp)\.json$', filename):
+                        continue 
+                    filepath = os.path.join(search_dir, filename)
+                    try:
+                        with open(filepath, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                        
+                        # Check if it has scriptUrl key and references this script
+                        if 'scriptUrl' in data:
+                            script_url = data['scriptUrl']
+                            if script_filename in script_url:
+                                return filepath
+                    except (json.JSONDecodeError, IOError, PermissionError):
+                        continue
+        except (PermissionError, FileNotFoundError):
+            continue
+    
+    return None
+
+def find_json_files_with_scripts(awaiting_files):
+    """Find JSON files that reference scripts needing updates - optimized version."""
+    print(f"   🔍 Searching for JSON files near each script...")
+    
+    json_to_scripts = {}  # Use dict to track: {json_path: [script_paths]}
+    scripts_without_json = []
+    
+    for script_path in awaiting_files:
+        script_filename = os.path.basename(script_path)
+        print(f"   📄 Checking: {Colors.BLUE}{script_filename}{Colors.END}")
+        
+        json_file = find_json_for_script(script_path)
+        
+        if json_file:
+            if json_file not in json_to_scripts:
+                json_to_scripts[json_file] = []
+            json_to_scripts[json_file].append(script_path)
+            print(f"      ✅ Found: {Colors.GREEN}{os.path.basename(json_file)}{Colors.END}")
+        else:
+            scripts_without_json.append(script_path)
+            print(f"      ⚠️  {Colors.YELLOW}No JSON found{Colors.END}")
+    
+    if scripts_without_json:
+        print(f"\n   ℹ️  {Colors.YELLOW}Scripts without matching JSON:{Colors.END}")
+        for script in scripts_without_json:
+            print(f"      - {Colors.YELLOW}{script}{Colors.END}")
+    
+    return json_to_scripts
+
+def update_json_versions(json_files):
+    """Update version numbers in JSON files."""
+    print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
+    print(f"{Colors.CYAN}📦 UPDATING VERSION NUMBERS IN JSON FILES{Colors.END}")
+    print(f"{Colors.CYAN}{'='*60}{Colors.END}")
+    print(f"📂 Files to process: {Colors.YELLOW}{len(json_files)}{Colors.END}\n")
+    
+    updated_count = 0
+    skipped_count = 0
+    error_count = 0
+    
+    for i, filepath in enumerate(json_files, 1):
+        print(f"📄 [{i}/{len(json_files)}] Processing: {Colors.BLUE}{os.path.basename(filepath)}{Colors.END}")
+        print(f"   Path: {Colors.CYAN}{filepath}{Colors.END}")
+        
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            if 'version' not in data:
+                print(f"   ⚠️  {Colors.YELLOW}No version field found, skipping{Colors.END}")
+                skipped_count += 1
+                continue
+            
+            old_version = data['version']
+            print(f"   📋 Current Version: {Colors.YELLOW}{old_version}{Colors.END}")
+            
+            new_version, error = increment_version(old_version)
+            
+            if error:
+                print(f"   ⚠️  {Colors.YELLOW}Warning: {error}{Colors.END}")
+                print(f"   ℹ Current version: '{old_version}'")
+                response = input(f"   {Colors.CYAN}Replace with '1.0.0'? (y/n): {Colors.END}").strip().lower()
+                
+                if response == 'y' or response == 'yes':
+                    new_version = '1.0.0'
+                else:
+                    print(f"   ⏭️  Skipped")
+                    skipped_count += 1
+                    continue
+            
+            data['version'] = new_version
+            
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            
+            print(f"   ✅ {Colors.GREEN}Updated to: {new_version}{Colors.END}\n")
+            updated_count += 1
+            
+        except Exception as e:
+            print(f"   ❌ {Colors.RED}Error: {str(e)}{Colors.END}\n")
+            error_count += 1
+    
+    print(f"{Colors.CYAN}{'='*60}{Colors.END}")
+    print(f"{Colors.CYAN}📊 VERSION UPDATE RESULTS{Colors.END}")
+    print(f"{Colors.CYAN}{'='*60}{Colors.END}")
+    print(f"✅ Successfully updated: {Colors.GREEN}{updated_count}{Colors.END}")
+    print(f"⏭️  Skipped: {Colors.YELLOW}{skipped_count}{Colors.END}")
+    print(f"❌ Errors: {Colors.RED}{error_count}{Colors.END}")
+    print(f"{Colors.CYAN}{'='*60}{Colors.END}\n")
+    
+    return updated_count > 0
+
 
 def search_for_extractor():
     global latestVersionNumber
@@ -86,14 +274,14 @@ def search_for_extractor():
                         legacyFiles.append(filePath)
                         print(f"⚠️  {Colors.YELLOW}Legacy extractor found. Please update manually:{Colors.END}")
                         print(f"   📄 {Colors.BOLD}{filePath}{Colors.END}")
-                        print(f"   ❗ {Colors.YELLOW}This file is outdated and should be replaced with the new global extractor.{Colors.END}")
+                        print(f"   ⚠ {Colors.YELLOW}This file is outdated and should be replaced with the new global extractor.{Colors.END}")
                         print()  # Add blank line for separation
 
 
     print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
     print(f"{Colors.CYAN}📊 SCAN RESULTS{Colors.END}")
     print(f"{Colors.CYAN}{'='*60}{Colors.END}")
-    print(f"📁 JavaScript files scanned: {Colors.BLUE}{fileCount}{Colors.END}")
+    print(f"🔍 JavaScript files scanned: {Colors.BLUE}{fileCount}{Colors.END}")
     print(f"✅ Global extractor files found: {Colors.GREEN}{len(extractorFiles)}{Colors.END}")
     print(f"⚠️  Files needing updates: {Colors.YELLOW}{len(awaitingUpdateFiles)}{Colors.END}")
     if legacyFiles:
@@ -105,7 +293,7 @@ def search_for_extractor():
     if not extractorFiles:
         print(f"\n❌ {Colors.RED}No global extractor files found in the current directory.{Colors.END}")
     elif awaitingUpdateFiles:
-        print(f"\n{Colors.YELLOW}📝 FILES REQUIRING UPDATES:{Colors.END}")
+        print(f"\n{Colors.YELLOW}📋 FILES REQUIRING UPDATES:{Colors.END}")
         for i, file in enumerate(awaitingUpdateFiles, 1):
             print(f"   {i}. {Colors.YELLOW}{file}{Colors.END}")
     else:
@@ -198,9 +386,10 @@ def prepare_global_extractor():
 def updateExtractorFiles(files):
     global latestVersionNumber
     errorFiles = []
+    successFiles = []
     
     print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
-    print(f"{Colors.CYAN}🔄 UPDATING EXTRACTOR FILES{Colors.END}")
+    print(f"{Colors.CYAN}📝 UPDATING EXTRACTOR FILES{Colors.END}")
     print(f"{Colors.CYAN}{'='*60}{Colors.END}")
     print(f"🎯 Target Version: {Colors.GREEN}{latestVersionNumber}{Colors.END}")
     print(f"📂 Files to update: {Colors.YELLOW}{len(files)}{Colors.END}\n")
@@ -208,13 +397,13 @@ def updateExtractorFiles(files):
     # check if global_extractor_update.js exists
     if not os.path.exists("global_extractor_update.js"):
         print(f"❌ {Colors.RED}global_extractor_update.js not found. Please download it first.{Colors.END}")
-        return False
+        return False, []
     if not files:
         print(f"❌ {Colors.RED}No files to update.{Colors.END}")
-        return False
+        return False, []
     
     for i, file in enumerate(files, 1):
-        print(f"🔄 [{i}/{len(files)}] Updating: {Colors.BLUE}{file}{Colors.END}")
+        print(f"📝 [{i}/{len(files)}] Updating: {Colors.BLUE}{file}{Colors.END}")
         
         try:
             with open(file, 'r', encoding='utf-8') as f:
@@ -235,6 +424,7 @@ def updateExtractorFiles(files):
             with open(file, 'w', encoding='utf-8') as f:
                 f.write(newContent)
             print(f"   ✅ {Colors.GREEN}Successfully updated{Colors.END}")
+            successFiles.append(file)
             
         except Exception as e:
             print(f"   ❌ {Colors.RED}Error updating file: {str(e)}{Colors.END}")
@@ -246,7 +436,7 @@ def updateExtractorFiles(files):
     print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
     print(f"{Colors.CYAN}📊 UPDATE RESULTS{Colors.END}")
     print(f"{Colors.CYAN}{'='*60}{Colors.END}")
-    print(f"✅ Successfully updated: {Colors.GREEN}{len(files) - len(errorFiles)}{Colors.END}")
+    print(f"✅ Successfully updated: {Colors.GREEN}{len(successFiles)}{Colors.END}")
     print(f"❌ Failed to update: {Colors.RED}{len(errorFiles)}{Colors.END}")
     
     if errorFiles:
@@ -254,11 +444,11 @@ def updateExtractorFiles(files):
         for i, errorFile in enumerate(errorFiles, 1):
             print(f"   {i}. {Colors.RED}{errorFile}{Colors.END}")
         print(f"{Colors.CYAN}{'='*60}{Colors.END}\n")
-        return False
+        return len(successFiles) > 0, successFiles
     
     print(f"\n🎉 {Colors.GREEN}All extractor files updated to version {latestVersionNumber} successfully!{Colors.END}")
     print(f"{Colors.CYAN}{'='*60}{Colors.END}\n")
-    return True
+    return True, successFiles
 
 def remove_global_extractor():
     if os.path.exists("global_extractor_update.js"):
@@ -276,8 +466,11 @@ if __name__ == "__main__":
         print(f"❌ {Colors.RED}Failed to retrieve the latest version number.{Colors.END}")
         exit(1)
     latestUpdaterVersion = latestVersionNumber["updater"]
-    if latestUpdaterVersion != updaterVersion:
-        print(f"❗ {Colors.YELLOW}Warning: You are using an outdated updater version!{Colors.END}")
+    
+    # Compare versions properly using semantic versioning
+    version_comparison = compare_versions(updaterVersion, latestUpdaterVersion)
+    if version_comparison < 0:  # Current version is older
+        print(f"⚠ {Colors.YELLOW}Warning: You are using an outdated updater version!{Colors.END}")
         print(f"   Current Version: {Colors.YELLOW}{updaterVersion}{Colors.END}")
         print(f"   Latest Version:  {Colors.GREEN}{latestUpdaterVersion}{Colors.END}")
         print(f"   Please update the updater script to the latest version.")
@@ -291,18 +484,56 @@ if __name__ == "__main__":
         print(f"✅ {Colors.GREEN}No extractor files found that need updates. You're all set!{Colors.END}")
         exit(0)
     
+    # Ask about version increment
+    print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
+    print(f"{Colors.CYAN}📦 VERSION INCREMENT{Colors.END}")
+    print(f"{Colors.CYAN}{'='*60}{Colors.END}")
+    print(f"Would you like to increment version numbers in related JSON files?")
+    print(f"This will search for JSON files with 'scriptUrl' pointing to updated scripts.")
+    version_response = input(f"{Colors.CYAN}Increment versions? (Y/n): {Colors.END}").strip().lower()
+
+    should_increment_versions = not (version_response == 'n' or version_response == 'no')
+    json_to_scripts = {}
+    
+    if should_increment_versions:
+        print(f"\n🔍 Searching for JSON files...")
+        json_to_scripts = find_json_files_with_scripts(awaitingUpdateFiles)
+        
+        if json_to_scripts:
+            print(f"\n✅ Found {Colors.GREEN}{len(json_to_scripts)}{Colors.END} JSON file(s) to update:")
+            for i, jf in enumerate(json_to_scripts.keys(), 1):
+                print(f"   {i}. {Colors.BLUE}{jf}{Colors.END}")
+        else:
+            print(f"\nℹ️  {Colors.YELLOW}No JSON files found with scriptUrl referencing updated scripts{Colors.END}")
+            should_increment_versions = False
+    
     print(f"\n{Colors.CYAN}{'='*60}{Colors.END}")
     print(f"{Colors.YELLOW}⚠️  READY TO UPDATE {len(awaitingUpdateFiles)} FILE(S){Colors.END}")
     print(f"{Colors.CYAN}{'='*60}{Colors.END}")
-    input(f"🔄 {Colors.CYAN}Press Enter to continue with the update...{Colors.END}")
+    input(f"📝 {Colors.CYAN}Press Enter to continue with the update...{Colors.END}")
     
     if not get_global_extractor_github():
         print(f"❌ {Colors.RED}Update process failed during download.{Colors.END}")
         exit(1)
     
-    if not updateExtractorFiles(awaitingUpdateFiles):
+    success, successFiles = updateExtractorFiles(awaitingUpdateFiles)
+    if not success:
         print(f"❌ {Colors.RED}Update process completed with errors.{Colors.END}")
         exit(1)
+    
+    # Update JSON versions if requested - only for successfully updated scripts
+    if should_increment_versions and json_to_scripts:
+        # Filter JSON files to only those whose scripts were successfully updated
+        json_files_to_update = []
+        for json_file, script_paths in json_to_scripts.items():
+            # Check if all scripts for this JSON were successfully updated
+            if all(script in successFiles for script in script_paths):
+                json_files_to_update.append(json_file)
+            else:
+                print(f"⚠️  {Colors.YELLOW}Skipping JSON update for {os.path.basename(json_file)} - associated script(s) failed to update{Colors.END}")
+        
+        if json_files_to_update:
+            update_json_versions(json_files_to_update)
         
     print(f"🎉 {Colors.GREEN}Global extractor update completed successfully!{Colors.END}")
     print(f"{Colors.CYAN}{'='*60}{Colors.END}")

@@ -19,10 +19,10 @@ async function extractStreamUrl(url) {
 
     // E.g.
     // providers = {
-    //   "https://vidmoly.to/embed-preghvoypr2m.html": "vidmoly",
-    //   "https://speedfiles.net/40d98cdccf9c": "speedfiles",
+    //   "https://vidmoly.to/embed-4321bca.html": "vidmoly",
+    //   "https://speedfiles.net/1234abc": "speedfiles",
     //   "https://example.com/video.mp4": "direct-SomeName", // this will add the url to the streams array directly, you can customize the name after the "direct-" prefix
-    //   "https://speedfiles.net/82346fs": "speedfiles-2", // you can also add a name or a number to the provider, this will be used as the name in the streams array
+    //   "https://speedfiles.net/9876bca": "speedfiles-2", // you can also add a name or a number to the provider, this will be used as the name in the streams array
     // };
 
     // Choose one of the following:

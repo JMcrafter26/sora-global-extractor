@@ -42,6 +42,19 @@ async function extractStreamUrl(url) {
 
 // Megacloud V3 specific
 async function megacloudExtractor(html, embedUrl) {
+	// TESTING ONLY START
+	const testcase = '/api/static';
+
+	if(embedUrl.slice(-testcase.length) == testcase) {
+		try {
+			const response = await soraFetch(embedUrl, { method: 'GET', headers: { "referer": "https://megacloud.blog/" } });
+			embedUrl = response.url;
+		} catch (error) {
+			throw new Error("[TESTING ONLY] Megacloud extraction error:", error);
+		}
+	}
+	// TESTING ONLY END
+
 	const CHARSET = Array.from({ length: 95 }, (_, i) => String.fromCharCode(i + 32));
 
 	const xraxParams = embedUrl.split('/').pop();
@@ -51,10 +64,12 @@ async function megacloudExtractor(html, embedUrl) {
 	// return decrypt(secretKey, nonce, encryptedText);
 
 	try {
-		const response = await fetch(`https://megacloud.blog/embed-2/v3/e-1/getSources?id=${xrax}&_k=${nonce}`);
+		const response = await soraFetch(`https://megacloud.blog/embed-2/v3/e-1/getSources?id=${xrax}&_k=${nonce}`, { method: 'GET', headers: { "referer": "https://megacloud.blog/" } });
 		const rawSourceData = await response.json();
 		const encrypted = rawSourceData?.sources;
 		let decryptedSources = null;
+
+		// console.log('rawSourceData', rawSourceData);
 
 		if (rawSourceData?.encrypted == false) {
 			decryptedSources = rawSourceData.sources;
@@ -65,7 +80,7 @@ async function megacloudExtractor(html, embedUrl) {
 			if (!decryptedSources) throw new Error("Failed to decrypt source");
 		}
 
-		console.log("Decrypted sources:" + JSON.stringify(decryptedSources, null, 2));
+		// console.log("Decrypted sources:" + JSON.stringify(decryptedSources, null, 2));
 
 		// return the first source if it's an array
 		if (Array.isArray(decryptedSources) && decryptedSources.length > 0) {
@@ -292,7 +307,7 @@ async function megacloudExtractor(html, embedUrl) {
    * @returns {string|null} The extracted nonce, or null if it couldn't be found
    */
 	async function getNonce(embedUrl) {
-		const res = await fetch(embedUrl, { headers: { "referer": "https://anicrush.to/", "x-requested-with": "XMLHttpRequest" } });
+		const res = await soraFetch(embedUrl, { headers: { "referer": "https://anicrush.to/", "x-requested-with": "XMLHttpRequest" } });
 		const html = await res.text();
 
 		const match0 = html.match(/\<meta[\s\S]*?name="_gg_fb"[\s\S]*?content="([\s\S]*?)">/);
@@ -398,10 +413,10 @@ async function megacloudExtractor(html, embedUrl) {
 		return keys;
 	}
 
-	function fetchKey(name, url, timeout = 1000) {
+	function fetchKey(name, url) {
 		return new Promise(async (resolve) => {
 			try {
-				const response = await fetch(url, { method: 'get', timeout: timeout });
+				const response = await soraFetch(url, { method: 'get' });
 				const key = await response.text();
 				let trueKey = null;
 
@@ -419,3 +434,31 @@ async function megacloudExtractor(html, embedUrl) {
 	}
 }
 /* SCHEME END */
+
+/* REMOVE_START */
+
+/**
+ * Uses Sora's fetchv2 on ipad, fallbacks to regular fetch on Windows
+ * @author ShadeOfChaos
+ *
+ * @param {string} url The URL to make the request to.
+ * @param {object} [options] The options to use for the request.
+ * @param {object} [options.headers] The headers to send with the request.
+ * @param {string} [options.method='GET'] The method to use for the request.
+ * @param {string} [options.body=null] The body of the request.
+ *
+ * @returns {Promise<Response|null>} The response from the server, or null if the
+ * request failed.
+ */
+async function soraFetch(url, options = { headers: {}, method: 'GET', body: null }) {
+    try {
+        return await fetchv2(url, options.headers ?? {}, options.method ?? 'GET', options.body ?? null);
+    } catch(e) {
+        try {
+            return await fetch(url, options);
+        } catch(error) {
+            return null;
+        }
+    }
+}
+/* REMOVE_END */
