@@ -28,7 +28,7 @@ class Colors:
     END = '\033[0m'  # Reset to default
 
 def get_latest_version_number():
-    versionUrl = "https://raw.githack.com/JMcrafter26/sora-global-extractor/main/global-extractor/VERSION.json" + "?r=" + str(random.randint(100000, 999999))
+    versionUrl = "https://raw.github.com/JMcrafter26/sora-global-extractor/main/global-extractor/VERSION.json" + "?r=" + str(random.randint(100000, 999999))
     response = requests.get(versionUrl)
     if response.status_code == 200:
         data = response.json()
@@ -311,7 +311,7 @@ def get_global_extractor_github():
     print(f"{Colors.CYAN}{'='*60}{Colors.END}")
     print(f"🌐 Downloading from GitHub...")
     
-    extractorUrl = "https://raw.githack.com/JMcrafter26/sora-global-extractor/refs/heads/main/global_extractor.js" + "?r=" + str(random.randint(100000, 999999))
+    extractorUrl = "https://raw.github.com/JMcrafter26/sora-global-extractor/refs/heads/main/global_extractor.js" + "?r=" + str(random.randint(100000, 999999))
     response = requests.get(extractorUrl)
     if response.status_code == 200:
         print(f"✅ {Colors.GREEN}Download completed successfully!{Colors.END}")
