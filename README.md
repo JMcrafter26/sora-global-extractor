@@ -4,7 +4,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
 [![Version](https://api.jm26.net/b/Version-1.1.6-green)](./global-extractor/VERSION.json)
-[![Extractors](https://api.jm26.net/b/Extractors-21-orange)](#available-extractors)
+[![Extractors](https://api.jm26.net/b/Extractors-22-orange)](#available-extractors)
 
 > [!CAUTION]
 > This project is licensed **exclusively for use within the [Sora/Sulfur iOS app](https://github.com/cranci1/Sora) and it's modules** .
@@ -102,6 +102,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 | [🎦 VideosPK](./extractors/new/videospk.js) | [50/50](https://github.com/50n50) |
 | [🌟 StreamUp](./extractors/streamup.js) | [Cufiy](https://github.com/JMcrafter26) |
 | [🍓 LuluStream](./extractors/lulustream.js) | [Cufiy](https://github.com/JMcrafter26) |
+| [📼 StreamTape](./extractors/streamtape.js) | [ShadeOfChaos](https://github.com/ShadeOfChaos) |
 
 > **Note**: All extractors are asynchronous. You can find out more about the individual extractors in their respective files.
 
@@ -141,12 +142,13 @@ The global extractor supports the following extractors:
 | videospk | ✅ |
 | streamup | ✅ |
 | lulustream | ✅ |
+| streamtape | ✅ |
 
-> **Last updated**: October 29, 2025
+> **Last updated**: November 05, 2025
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 76.19% (16/21 extractors passing)
+> **Success Rate**: 77.27% (17/22 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -188,6 +190,7 @@ try {
 ```
 
 **Benefits:**
+
 - ✅ Multiple stream options for users
 - ✅ Automatic fallback if one provider fails  
 - ✅ Parallel processing for better performance
@@ -242,6 +245,7 @@ const providers = {
 Since version 1.1.0, the collection includes an intelligent auto-updater that keeps your extractors current across all your Sora modules. The updater automatically scans your directory structure, identifies outdated extractors, and updates them to the latest version.
 
 **Features:**
+
 - 🔍 **Smart Detection**: Automatically finds all global extractor files
 - 🔄 **Batch Updates**: Updates multiple modules simultaneously  
 - 🛡️ **Version Validation**: Ensures version compatibility
@@ -253,18 +257,21 @@ Since version 1.1.0, the collection includes an intelligent auto-updater that ke
 ### 📖 Usage Instructions
 
 1. **Prerequisites:**
+
    ```bash
    # Ensure Python 3.x is installed
    python --version
    ```
 
 2. **Download the updater:**
+
    ```bash
    # Place in your Sora modules root directory
    wget https://raw.githubusercontent.com/JMcrafter26/sora-global-extractor/main/global-extractor/update_global_extractor.py
    ```
 
 3. **Run the updater:**
+
    ```bash
    python update_global_extractor.py
    ```
@@ -281,6 +288,7 @@ The updater follows a structured process:
 6. **✅ Validation**: Confirms successful updates
 
 **Sample Output:**
+
 ```
 🚀 SORA GLOBAL EXTRACTOR UPDATER v1.0.0
 ============================================================
@@ -294,6 +302,7 @@ The updater follows a structured process:
 ## 🛠️ Development
 
 ### Project Structure
+
 ```
 sora-streamurl-extractors/
 ├── extractors/           # Individual extractor implementations
@@ -306,12 +315,14 @@ sora-streamurl-extractors/
 ```
 
 ### Building the Global Extractor
+
 ```bash
 cd global-extractor
 python build.py
 ```
 
 ### Running Tests
+
 ```bash
 cd global-extractor/test
 node global_extractor_test.js
@@ -331,6 +342,7 @@ For detailed information about changes, improvements, and version history, see o
 
 **Recent Updates:**
 
+- **v1.1.7** (November 5, 2025): Added StreamTape extractor
 - **v1.1.6** (October 29, 2025): Added 4shared, LuluStream, OneUpload, PlayerWish, SendVid, SmoothPre, StreamUp, SuperVideo, UploadCX, VideosPK extractors
 - **v1.1.5** (September 18, 2025): Added Dailymotion and Earnvids extractors, removed Turbovid, improved error handling
 - **v1.1.4** (August 13, 2025): Added Megacloud, Sibnet, UQLoad, and VK extractors, improved logging
@@ -346,12 +358,13 @@ For detailed information about changes, improvements, and version history, see o
 - [ ] Allow extractor to return multiple formats streams
 - [ ] Subtitle support
 - [ ] Add more extractors
- 
+
 ## 📄 License
 
 This project is licensed under a **Custom License** that restricts usage to the **Sora/Sulfur iOS application** ecosystem only. 
 
 **Key Points:**
+
 - ✅ **Permitted**: Use within Sora/Sulfur iOS applications and modules
 - ❌ **Prohibited**: Commercial redistribution, modification for other platforms
 - 📖 **Full Terms**: See [LICENSE](./LICENSE) for complete details

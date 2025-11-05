@@ -2,7 +2,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.1.6} */
+/* {VERSION: 1.1.7} */
 
 /**
  * @name global_extractor.js
@@ -10,8 +10,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2025-10-29 03:42:13
- * @version 1.1.6
+ * @date 2025-11-05 13:41:57
+ * @version 1.1.7
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -25,7 +25,7 @@ async function extractStreamUrl(url) {
     // Logic to populate providers
     // ...
     // Note: The higher up the provider is in the list, the higher the priority
-    // Available providers: bigwarp, doodstream, earnvids, filemoon, lulustream, mp4upload, sendvid, sibnet, streamup, supervideo, uploadcx, uqload, videospk, vidmoly, vidoza, voe
+    // Available providers: bigwarp, doodstream, earnvids, filemoon, lulustream, mp4upload, sendvid, sibnet, streamtape, streamup, supervideo, uploadcx, uqload, videospk, vidmoly, vidoza, voe
 
 
     // E.g.
@@ -326,6 +326,13 @@ async function extractStreamUrlByProvider(url, provider) {
          console.log("Error extracting stream URL from sibnet:", error);
          return null;
       }
+    case "streamtape":
+      try {
+         return await streamtapeExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from streamtape:", error);
+         return null;
+      }
     case "streamup":
       try {
          return await streamupExtractor(html, url);
@@ -602,6 +609,67 @@ async function sibnetExtractor(html, embedUrl) {
     } catch (error) {
         console.log("SibNet extractor error: " + error.message);
         return null;
+    }
+}
+
+
+/* --- streamtape --- */
+
+/**
+ * 
+ * @name streamTapeExtractor
+ * @author ShadeOfChaos
+ */
+async function streamtapeExtractor(html, url) {
+    let promises = [];
+    const LINK_REGEX = /link['"]{1}\).innerHTML *= *['"]{1}([\s\S]*?)["'][\s\S]*?\(["']([\s\S]*?)["']([\s\S]*?);/g;
+    const CHANGES_REGEX = /([0-9]+)/g;
+    if(html == null) {
+        if(url == null) {
+            throw new Error('Provided incorrect parameters.');
+        }
+        const response = await soraFetch(url);
+        html = await response.text();
+    }
+    const matches = html.matchAll(LINK_REGEX);
+    for (const match of matches) {
+        let base = match?.[1];
+        let params = match?.[2];
+        const changeStr = match?.[3];
+        if(changeStr == null || changeStr == '') continue;
+        const changes = changeStr.match(CHANGES_REGEX);
+        for(let n of changes) {
+            params = params.substring(n);
+        }
+        while(base[0] == '/') {
+            base = base.substring(1);
+        }
+        const url = 'https://' + base + params;
+        promises.push(testUrl(url));
+    }
+    // Race for first success
+    return Promise.any(promises).then((value) => {
+        return value;
+    }).catch((error) => {
+        return null;
+    });
+    async function testUrl(url) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Timeout version prefered, but Sora does not support it currently
+                // var response = await soraFetch(url, { method: 'GET', signal: AbortSignal.timeout(2000) });
+                var response = await soraFetch(url);
+                if(response == null) throw new Error('Connection timed out.');
+            } catch(e) {
+                console.error('Rejected due to:', e.message);
+                return reject(null);
+            }
+            if(response?.ok && response?.status === 200) {
+                return resolve(url);
+            }
+            console.warn('Reject because of response:', response?.ok, response?.status);
+            return reject(null);
+        });
     }
 }
 
