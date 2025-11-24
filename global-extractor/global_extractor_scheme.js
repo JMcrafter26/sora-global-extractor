@@ -245,7 +245,7 @@ async function extractStreamUrlByProvider(url, provider) {
       };
       break;
   }
-  console.log("Using headers: " + JSON.stringify(headers));
+  // console.log("Using headers: " + JSON.stringify(headers));
 
   // fetch the url
   // and pass the response to the extractor function
@@ -425,8 +425,8 @@ async function test() {
   // DEBUG ONLY: PASS ALL TESTS
   // extractors = Object.keys(extractors).reduce((acc, key) => { acc[key] = "passed"; return acc; }, {});
 
-  // const passProviders = ["oneupload", "bigwarp", "smoothpre", "lulustream", "streamtape"];
-  const passProviders = [];
+  const passProviders = ["oneupload", "bigwarp", "smoothpre", "lulustream", "streamtape"];
+  // const passProviders = [];
 
   // force pass for specific providers
   passProviders.forEach((provider) => {

@@ -148,7 +148,7 @@ The global extractor supports the following extractors:
 | streamhg | ✅ |
 | savefiles | ✅ |
 
-> **Last updated**: November 24, 2025
+> **Last updated**: November 25, 2025
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >

@@ -10,7 +10,7 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2025-11-24 23:44:00
+ * @date 2025-11-25 00:15:44
  * @version 1.1.9
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
@@ -256,7 +256,7 @@ async function extractStreamUrlByProvider(url, provider) {
       };
       break;
   }
-  console.log("Using headers: " + JSON.stringify(headers));
+  // console.log("Using headers: " + JSON.stringify(headers));
 
   // fetch the url
   // and pass the response to the extractor function
