@@ -1,43 +1,41 @@
 async function extractStreamUrl(url) {
+  try {
+    let streamUrl = null;
+    const response = await soraFetch(url);
+    const data = await response.text();
     try {
-        let streamUrl = null;
-        const response = await soraFetch(url);
-        const data = await response.text();
-        try {
-            streamUrl = await videospkExtractor(data, url);
-        } catch (error) {
-            console.log("Extraction error:" + error);
-        }
-        if (streamUrl) {
-            return streamUrl;
-        }
-        return null;
+      streamUrl = await streamhgExtractor(data, url);
     } catch (error) {
-        console.log("Fetch error:", error);
-        return null;
+      console.log("StreamHG extraction error:" + error);
     }
+    if (streamUrl) {
+      return streamUrl;
+    }
+    return null;
+  } catch (error) {
+    console.log("Fetch error:", error);
+    return null;
+  }
 }
 
 /* SCHEME START */
 /* {REQUIRED PLUGINS: unbaser} */
 
 /**
- * @name videospkExtractor
- * @author 50/50
+ * @name streamhgExtractor
+ * @author cufiy
  */
+async function streamhgExtractor(data, url = null) {
+    const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
 
-async function videospkExtractor(data, url = null) {
-        const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
-        const unpackedScript = unpack(obfuscatedScript[1]);
+    const decodedScript = unpack(obfuscatedScript[1]);
 
-        const streamMatch = unpackedScript.match(/["'](\/stream\/[^"']+)["']/);
-        const hlsLink = streamMatch ? streamMatch[1] : null;
+    const hlsStreamUrlMatch = decodedScript.match(/"hls2"\s*:\s*"([^"]+)"/);
 
-        return "https://videospk.xyz" + hlsLink;
+    return hlsStreamUrlMatch[1];
 }
 
 /* REMOVE_START */
-
 /***********************************************************
  * UNPACKER MODULE
  * Credit to GitHub user "mnsrulz" for Unpacker Node library
@@ -157,6 +155,9 @@ function unpack(source) {
     }
 }
 
+/* REMOVE_END */
+
+/* SCHEME END */
 async function soraFetch(url, options = { headers: {}, method: 'GET', body: null }) {
     try {
         return await fetchv2(url, options.headers ?? {}, options.method ?? 'GET', options.body ?? null);
@@ -168,6 +169,3 @@ async function soraFetch(url, options = { headers: {}, method: 'GET', body: null
         }
     }
 }
-
-/* REMOVE_END */
-/* SCHEME END */

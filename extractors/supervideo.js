@@ -1,7 +1,16 @@
 async function extractStreamUrl(url) {
     try {
         let streamUrl = null;
-        const response = await soraFetch(url);
+        const response = await soraFetch(url, {
+            headers: {
+                "Accept": "*/*",
+                "Accept-Encoding": "gzip, deflate, br",
+                "User-Agent": "EchoapiRuntime/1.1.0",
+                "Connection": "keep-alive",
+                "Cache-Control": "no-cache",
+                "Host": url.match(/https?:\/\/([^\/]+)/)[1],
+            },
+        });
         const data = await response.text();
         // print response code
         console.log("Response code:" + response.status);

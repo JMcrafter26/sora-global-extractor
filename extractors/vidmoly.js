@@ -1,6 +1,6 @@
 async function extractStreamUrl(url) {
   try {
-    const response = await fetch(url);
+    const response = await soraFetch(url);
     const html = (await response.text) ? response.text() : response;
 
     let streamUrl = null;
@@ -52,7 +52,7 @@ async function vidmolyExtractor(html, url = null) {
       ? "https:" + iframeMatch[1]
       : iframeMatch[1];
 
-    const responseTwo = await fetchv2(streamUrl);
+    const responseTwo = await soraFetch(streamUrl);
     const htmlTwo = await responseTwo.text();
 
     const m3u8Match = htmlTwo.match(/sources:\s*\[\{file:"([^"]+\.m3u8)"/);
@@ -71,3 +71,15 @@ async function vidmolyExtractor(html, url = null) {
 }
 
 /* SCHEME END */
+
+async function soraFetch(url, options = { headers: {}, method: 'GET', body: null }) {
+    try {
+        return await fetchv2(url, options.headers ?? {}, options.method ?? 'GET', options.body ?? null);
+    } catch(e) {
+        try {
+            return await fetch(url, options);
+        } catch(error) {
+            return null;
+        }
+    }
+}

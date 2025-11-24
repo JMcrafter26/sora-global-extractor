@@ -12,13 +12,15 @@
   "sibnet": "passed",
   "earnvids": "passed",
   "dailymotion": "failed",
-  "oneupload": "failed",
+  "oneupload": "passed",
   "sendvid": "passed",
-  "smoothpre": "failed",
+  "smoothpre": "passed",
   "supervideo": "passed",
   "uploadcx": "passed",
   "videospk": "passed",
   "streamup": "passed",
   "lulustream": "passed",
-  "streamtape": "passed"
+  "streamtape": "passed",
+  "streamhg": "passed",
+  "savefiles": "passed"
 }

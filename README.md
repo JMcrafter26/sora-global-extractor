@@ -3,8 +3,8 @@
 A comprehensive collection of JavaScript extractors for retrieving stream URLs from various hosting services. Designed specifically for integration with Sora iOS application modules.
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
-[![Version](https://api.jm26.net/b/Version-1.1.6-green)](./global-extractor/VERSION.json)
-[![Extractors](https://api.jm26.net/b/Extractors-22-orange)](#available-extractors)
+[![Version](https://api.jm26.net/b/Version-1.1.9-green)](./global-extractor/VERSION.json)
+[![Extractors](https://api.jm26.net/b/Extractors-24-orange)](#available-extractors)
 
 > [!CAUTION]
 > This project is licensed **exclusively for use within the [Sora/Sulfur iOS app](https://github.com/cranci1/Sora) and it's modules** .
@@ -103,6 +103,8 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 | [🌟 StreamUp](./extractors/streamup.js) | [Cufiy](https://github.com/JMcrafter26) |
 | [🍓 LuluStream](./extractors/lulustream.js) | [Cufiy](https://github.com/JMcrafter26) |
 | [📼 StreamTape](./extractors/streamtape.js) | [ShadeOfChaos](https://github.com/ShadeOfChaos) |
+| [🏠 StreamHG](./extractors/streamhg.js) | [Cufiy](https://github.com/JMcrafter26) |
+| [💾 SaveFiles](./extractors/savefiles.js) | [Cufiy](https://github.com/JMcrafter26) |
 
 > **Note**: All extractors are asynchronous. You can find out more about the individual extractors in their respective files.
 
@@ -134,21 +136,23 @@ The global extractor supports the following extractors:
 | sibnet | ✅ |
 | earnvids | ✅ |
 | dailymotion | ❌ |
-| oneupload | ❌ |
+| oneupload | ✅ |
 | sendvid | ✅ |
-| smoothpre | ❌ |
+| smoothpre | ✅ |
 | supervideo | ✅ |
 | uploadcx | ✅ |
 | videospk | ✅ |
 | streamup | ✅ |
 | lulustream | ✅ |
 | streamtape | ✅ |
+| streamhg | ✅ |
+| savefiles | ✅ |
 
-> **Last updated**: November 05, 2025
+> **Last updated**: November 24, 2025
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 81.82% (18/22 extractors passing)
+> **Success Rate**: 91.67% (22/24 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -342,6 +346,7 @@ For detailed information about changes, improvements, and version history, see o
 
 **Recent Updates:**
 
+- **v1.1.9** (November 24, 2025): Added StreamHG and SaveFiles extractors, improved multi-extractor reliability
 - **v1.1.8** (November 12, 2025): Fixed VK extractor, improved error handling
 - **v1.1.7** (November 5, 2025): Added StreamTape extractor
 - **v1.1.6** (October 29, 2025): Added 4shared, LuluStream, OneUpload, PlayerWish, SendVid, SmoothPre, StreamUp, SuperVideo, UploadCX, VideosPK extractors

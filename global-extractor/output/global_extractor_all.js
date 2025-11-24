@@ -3,7 +3,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.1.8} */
+/* {VERSION: 1.1.9} */
 
 /**
  * @name global_extractor.js
@@ -11,8 +11,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2025-11-05 15:44:24
- * @version 1.1.8
+ * @date 2025-11-24 23:43:50
+ * @version 1.1.9
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -26,8 +26,7 @@ async function extractStreamUrl(url) {
     // Logic to populate providers
     // ...
     // Note: The higher up the provider is in the list, the higher the priority
-    // Available providers: bigwarp, dailymotion, doodstream, earnvids, filemoon, fourshared, lulustream, megacloud, mp4upload, oneupload, playerwish, sendvid, sibnet, smoothpre, streamtape, streamup, streamwish, supervideo, uploadcx, uqload, videospk, vidmoly, vidoza, vk, voe
-
+    // Available providers: bigwarp, dailymotion, doodstream, earnvids, filemoon, fourshared, lulustream, megacloud, mp4upload, oneupload, playerwish, savefiles, sendvid, sibnet, smoothpre, streamhg, streamtape, streamup, streamwish, supervideo, uploadcx, uqload, videospk, vidmoly, vidoza, vk, voe
 
     // E.g.
     // providers = {
@@ -45,15 +44,16 @@ async function extractStreamUrl(url) {
       streams = await multiExtractor(providers);
       let returnedStreams = {
         streams: streams,
-      }
+      };
 
-      console.log("Multi extractor streams: " + JSON.stringify(returnedStreams));
+      console.log(
+        "Multi extractor streams: " + JSON.stringify(returnedStreams)
+      );
       return JSON.stringify(returnedStreams);
     } catch (error) {
       console.log("Multi extractor error:" + error);
       return JSON.stringify([{ provider: "Error2", link: "" }]);
     }
-
 
     // Single extractor
     let streamUrl = null;
@@ -68,8 +68,6 @@ async function extractStreamUrl(url) {
       throw new Error("Stream URL not found");
     }
     return streamUrl;
-
-
   } catch (error) {
     console.log("Fetch error:", error);
     return null;
@@ -82,11 +80,15 @@ function globalExtractor(providers) {
     try {
       const streamUrl = extractStreamUrlByProvider(url, provider);
       // check if streamUrl is not null, a string, and starts with http or https
-      if (streamUrl && typeof streamUrl === "string" && (streamUrl.startsWith("http"))) {
+      if (
+        streamUrl &&
+        typeof streamUrl === "string" &&
+        streamUrl.startsWith("http")
+      ) {
         return streamUrl;
         // if its an array, get the value that starts with http
       } else if (Array.isArray(streamUrl)) {
-        const httpStream = streamUrl.find(url => url.startsWith("http"));
+        const httpStream = streamUrl.find((url) => url.startsWith("http"));
         if (httpStream) {
           return httpStream;
         }
@@ -94,7 +96,6 @@ function globalExtractor(providers) {
         // check if it's a valid stream URL
         return null;
       }
-
     } catch (error) {
       // Ignore the error and try the next provider
     }
@@ -158,9 +159,9 @@ async function multiExtractor(providers) {
         continue;
       }
       let streamUrl = await extractStreamUrlByProvider(url, provider);
-      
-       if (streamUrl && Array.isArray(streamUrl)) {
-        const httpStream = streamUrl.find(url => url.startsWith("http"));
+
+      if (streamUrl && Array.isArray(streamUrl)) {
+        const httpStream = streamUrl.find((url) => url.startsWith("http"));
         if (httpStream) {
           streamUrl = httpStream;
         }
@@ -205,73 +206,93 @@ async function multiExtractor(providers) {
 async function extractStreamUrlByProvider(url, provider) {
   if (eval(`typeof ${provider}Extractor`) !== "function") {
     // skip if the extractor is not defined
-    console.log(`Extractor for provider ${provider} is not defined, skipping...`);
+    console.log(
+      `Extractor for provider ${provider} is not defined, skipping...`
+    );
     return null;
   }
+  let uas = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15",
+    "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+  ];
   let headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "User-Agent": uas[(url.length + provider.length) % uas.length], // use a different user agent based on the url and provider
+    Accept:
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
-    "Referer": url,
-    "Connection": "keep-alive",
-    "x-Requested-With": "XMLHttpRequest"
+    Referer: url,
+    Host: url.match(/https?:\/\/([^\/]+)/)[1],
+    Connection: "keep-alive",
+    "x-Requested-With": "XMLHttpRequest",
   };
-  if(provider == 'bigwarp') {
-    delete headers["User-Agent"];
-    headers["x-requested-with"] = "XMLHttpRequest";
-  } else if (provider == 'vk') {
-    headers["encoding"] = "windows-1251"; // required
-  } else if (provider == 'sibnet') {
-    headers["encoding"] = "windows-1251"; // required
-  } else if (provider == 'supervideo') {
-    delete headers["User-Agent"];
+
+  switch (provider) {
+    case "bigwarp":
+      delete headers["User-Agent"];
+      break;
+    case "vk":
+    case "sibnet":
+      headers["encoding"] = "windows-1251"; // required
+      break;
+    case "supervideo":
+      headers = {
+        Accept: "*/*",
+        "Accept-Encoding": "gzip, deflate, br",
+        "User-Agent": "EchoapiRuntime/1.1.0",
+        Connection: "keep-alive",
+        "Cache-Control": "no-cache",
+        Host: url.match(/https?:\/\/([^\/]+)/)[1],
+      };
+      break;
+    case "streamtape":
+      headers = {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0",
+        "Accept":
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      };
+      break;
   }
+  console.log("Using headers: " + JSON.stringify(headers));
 
   // fetch the url
   // and pass the response to the extractor function
   console.log("Fetching URL: " + url);
   const response = await soraFetch(url, {
-      headers
-    });
+    headers,
+  });
 
   console.log("Response: " + response.status);
   let html = response.text ? await response.text() : response;
   // if title contains redirect, then get the redirect url
-  const title = html.match(/<title>(.*?)<\/title>/);
-  if (title && title[1].toLowerCase().includes("redirect")) {
-    const redirectUrl = html.match(/<meta http-equiv="refresh" content="0;url=(.*?)"/);
-    const redirectUrl2 = html.match(/window\.location\.href\s*=\s*["'](.*?)["']/);
-    const redirectUrl3 = html.match(/window\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/);
+  const matches = [
+    /<meta http-equiv="refresh" content="0;url=(.*?)"/,
+    /window\.location\.href\s*=\s*["'](.*?)["']/,
+    /window\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/,
+    /window\.location\s*=\s*["'](.*?)["']/,
+    /window\.location\.assign\s*\(\s*["'](.*?)["']\s*\)/,
+    /top\.location\s*=\s*["'](.*?)["']/,
+    /top\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/,
+  ];
+  for (const match of matches) {
+    const redirectUrl = html.match(match);
     if (redirectUrl) {
-      console.log("Redirect URL: " + redirectUrl[1]);
+      console.log("Redirect URL found: " + redirectUrl[1]);
       url = redirectUrl[1];
       html = await soraFetch(url, {
-        headers
-      });
-      html = html.text ? await html.text() : html;
-
-    } else if (redirectUrl2) {
-      console.log("Redirect URL 2: " + redirectUrl2[1]);
-      url = redirectUrl2[1];
-      html = await soraFetch(url, {
-        headers
-      });
-      html = html.text ? await html.text() : html;
-    } else if (redirectUrl3) {
-      console.log("Redirect URL 3: " + redirectUrl3[1]);
-      url = redirectUrl3[1];
-      html = await soraFetch(url, {
-        headers
-      });
-      html = html.text ? await html.text() : html;
-    } else {
-      console.log("No redirect URL found");
+        headers,
+      }).then((res) => res.text());
+      break;
     }
   }
 
   // console.log("HTML: " + html);
   switch (provider) {
-    case "bigwarp":
+        case "bigwarp":
       try {
          return await bigwarpExtractor(html, url);
       } catch (error) {
@@ -348,6 +369,13 @@ async function extractStreamUrlByProvider(url, provider) {
          console.log("Error extracting stream URL from playerwish:", error);
          return null;
       }
+    case "savefiles":
+      try {
+         return await savefilesExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from savefiles:", error);
+         return null;
+      }
     case "sendvid":
       try {
          return await sendvidExtractor(html, url);
@@ -367,6 +395,13 @@ async function extractStreamUrlByProvider(url, provider) {
          return await smoothpreExtractor(html, url);
       } catch (error) {
          console.log("Error extracting stream URL from smoothpre:", error);
+         return null;
+      }
+    case "streamhg":
+      try {
+         return await streamhgExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from streamhg:", error);
          return null;
       }
     case "streamtape":
@@ -451,9 +486,6 @@ async function extractStreamUrlByProvider(url, provider) {
       throw new Error(`Unknown provider: ${provider}`);
   }
 }
-
-
-
 
 
 
@@ -674,7 +706,7 @@ async function foursharedExtractor(data, url = null) {
         const match = data.match(/<iframe[^>]+src="(https:\/\/www\.4shared\.com\/web\/embed\/file\/[^"]+)"/i);
         if (match && match[1]) {
             const videoEmbedUrl = match[1].trim();
-            const response2 = await fetchv2(videoEmbedUrl);
+            const response2 = await soraFetch(videoEmbedUrl);
             const html2 = await response2.text();
             const match2 = html2.match(/<source[^>]+src="([^"]+)"[^>]*type="video\/mp4"/i);
             if (match2 && match2[1]) {
@@ -1092,6 +1124,19 @@ async function playwishExtractor(data, url = null) {
 
 
 
+/* --- savefiles --- */
+
+/**
+ * @name savefilesExtractor
+ * @author Cufiy
+ */
+async function savefilesExtractor(data, url = null) {
+    const match = data.match(/sources:\s*\[\{file:"([^"]+)"\}\]/);
+    const fileUrl = match ? match[1] : null;
+    return fileUrl;
+}
+
+
 /* --- sendvid --- */
 
 /**
@@ -1153,6 +1198,22 @@ async function smoothpreExtractor(data, url = null) {
     return hls2Url;
 }
 
+
+
+
+/* --- streamhg --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name streamhgExtractor
+ * @author cufiy
+ */
+async function streamhgExtractor(data, url = null) {
+    const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+    const decodedScript = unpack(obfuscatedScript[1]);
+    const hlsStreamUrlMatch = decodedScript.match(/"hls2"\s*:\s*"([^"]+)"/);
+    return hlsStreamUrlMatch[1];
+}
 
 
 
@@ -1359,7 +1420,7 @@ async function vidmolyExtractor(html, url = null) {
     const streamUrl = iframeMatch[1].startsWith("//")
       ? "https:" + iframeMatch[1]
       : iframeMatch[1];
-    const responseTwo = await fetchv2(streamUrl);
+    const responseTwo = await soraFetch(streamUrl);
     const htmlTwo = await responseTwo.text();
     const m3u8Match = htmlTwo.match(/sources:\s*\[\{file:"([^"]+\.m3u8)"/);
     return m3u8Match ? m3u8Match[1] : null;
@@ -1513,7 +1574,6 @@ function voeShiftChars(str, shift) {
 
 
 
-
 ////////////////////////////////////////////////
 //                 PLUGINS                    //
 ////////////////////////////////////////////////
@@ -1531,17 +1591,25 @@ function voeShiftChars(str, shift) {
  * @returns {Promise<Response|null>} The response from the server, or null if the
  * request failed.
  */
-async function soraFetch(url, options = { headers: {}, method: 'GET', body: null }) {
+async function soraFetch(
+  url,
+  options = { headers: {}, method: "GET", body: null }
+) {
+  try {
+    return await fetchv2(
+      url,
+      options.headers ?? {},
+      options.method ?? "GET",
+      options.body ?? null
+    );
+  } catch (e) {
     try {
-        return await fetchv2(url, options.headers ?? {}, options.method ?? 'GET', options.body ?? null);
-    } catch(e) {
-        try {
-            return await fetch(url, options);
-        } catch(error) {
-            await console.log('soraFetch error: ' + error.message);
-            return null;
-        }
+      return await fetch(url, options);
+    } catch (error) {
+      await console.log("soraFetch error: " + error.message);
+      return null;
     }
+  }
 }
 
 
@@ -1647,6 +1715,6 @@ function unpack(source) {
     }
 }
 
- 
+
 
 /* {GE END} */

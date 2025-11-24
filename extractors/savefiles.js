@@ -2,11 +2,12 @@ async function extractStreamUrl(url) {
     try {
         let streamUrl = null;
         const response = await soraFetch(url);
+        console.log("Response status:", response.status);
         const data = await response.text();
         try {
-            streamUrl = await sendvidExtractor(data, url);
+            streamUrl = await savefilesExtractor(data, url);
         } catch (error) {
-            console.log("SendVid extraction error:" + error);
+            console.log("SaveFiles extraction error:" + error);
         }
         if (streamUrl) {
             return streamUrl;
@@ -21,15 +22,15 @@ async function extractStreamUrl(url) {
 /* SCHEME START */
 
 /**
- * @name sendvidExtractor
- * @author 50/50
+ * @name savefilesExtractor
+ * @author Cufiy
  */
+async function savefilesExtractor(data, url = null) {
+    const match = data.match(/sources:\s*\[\{file:"([^"]+)"\}\]/);
+    const fileUrl = match ? match[1] : null;
 
-async function sendvidExtractor(data, url = null) {
-    const match = data.match(/var\s+video_source\s*=\s*"([^"]+)"/);
-    const videoUrl = match ? match[1] : null;
+    return fileUrl;
 
-    return videoUrl;
 }
 /* SCHEME END */
 

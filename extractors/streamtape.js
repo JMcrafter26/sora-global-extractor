@@ -1,18 +1,27 @@
 async function extractStreamUrl(url) {
+  try {
+    let streamUrl = null;
+      let headers = {
+   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0",
+   "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+  };
+    const response = await soraFetch(url, {
+        headers
+    });
+    const data = await response.text();
     try {
-        var streamUrl = await streamtapeExtractor(url);
+      streamUrl = await streamtapeExtractor(data, url);
     } catch (error) {
-        console.log("StreamTape extraction error:", error);
+      console.log("StreamTape extraction error:" + error);
     }
-
-    console.log("StreamTape Stream URL: " + streamUrl);
-    if (streamUrl && streamUrl !== false && streamUrl !== null) {
-        return streamUrl;
+    if (streamUrl) {
+      return streamUrl;
     }
-
-    console.log("No stream URL found");
-
     return null;
+  } catch (error) {
+    console.log("Fetch error:", error);
+    return null;
+  }
 }
 
 /* SCHEME START */
@@ -119,3 +128,10 @@ async function soraFetch(url, options = { headers: {}, method: 'GET', body: null
     }
 }
 /* REMOVE_END */
+
+try {
+    const streamUrl = await extractStreamUrl("https://tapepops.com/e/GMRoe9vmGJH1v7G");
+    console.log("Extracted Stream URL:", streamUrl);
+} catch (error) {
+    console.error("Error during extraction:", error);
+}

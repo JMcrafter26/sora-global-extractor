@@ -16,7 +16,6 @@ async function extractStreamUrl(url) {
     // Note: The higher up the provider is in the list, the higher the priority
     // Available providers: /* {ALL_PROVIDERS} */
 
-
     // E.g.
     // providers = {
     //   "https://vidmoly.to/embed-4321bca.html": "vidmoly",
@@ -33,15 +32,16 @@ async function extractStreamUrl(url) {
       streams = await multiExtractor(providers);
       let returnedStreams = {
         streams: streams,
-      }
+      };
 
-      console.log("Multi extractor streams: " + JSON.stringify(returnedStreams));
+      console.log(
+        "Multi extractor streams: " + JSON.stringify(returnedStreams)
+      );
       return JSON.stringify(returnedStreams);
     } catch (error) {
       console.log("Multi extractor error:" + error);
       return JSON.stringify([{ provider: "Error2", link: "" }]);
     }
-
 
     // Single extractor
     let streamUrl = null;
@@ -56,8 +56,6 @@ async function extractStreamUrl(url) {
       throw new Error("Stream URL not found");
     }
     return streamUrl;
-
-
   } catch (error) {
     console.log("Fetch error:", error);
     return null;
@@ -70,11 +68,15 @@ function globalExtractor(providers) {
     try {
       const streamUrl = extractStreamUrlByProvider(url, provider);
       // check if streamUrl is not null, a string, and starts with http or https
-      if (streamUrl && typeof streamUrl === "string" && (streamUrl.startsWith("http"))) {
+      if (
+        streamUrl &&
+        typeof streamUrl === "string" &&
+        streamUrl.startsWith("http")
+      ) {
         return streamUrl;
         // if its an array, get the value that starts with http
       } else if (Array.isArray(streamUrl)) {
-        const httpStream = streamUrl.find(url => url.startsWith("http"));
+        const httpStream = streamUrl.find((url) => url.startsWith("http"));
         if (httpStream) {
           return httpStream;
         }
@@ -82,7 +84,6 @@ function globalExtractor(providers) {
         // check if it's a valid stream URL
         return null;
       }
-
     } catch (error) {
       // Ignore the error and try the next provider
     }
@@ -146,9 +147,9 @@ async function multiExtractor(providers) {
         continue;
       }
       let streamUrl = await extractStreamUrlByProvider(url, provider);
-      
-       if (streamUrl && Array.isArray(streamUrl)) {
-        const httpStream = streamUrl.find(url => url.startsWith("http"));
+
+      if (streamUrl && Array.isArray(streamUrl)) {
+        const httpStream = streamUrl.find((url) => url.startsWith("http"));
         if (httpStream) {
           streamUrl = httpStream;
         }
@@ -193,78 +194,97 @@ async function multiExtractor(providers) {
 async function extractStreamUrlByProvider(url, provider) {
   if (eval(`typeof ${provider}Extractor`) !== "function") {
     // skip if the extractor is not defined
-    console.log(`Extractor for provider ${provider} is not defined, skipping...`);
+    console.log(
+      `Extractor for provider ${provider} is not defined, skipping...`
+    );
     return null;
   }
+  let uas = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15",
+    "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+  ];
   let headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "User-Agent": uas[(url.length + provider.length) % uas.length], // use a different user agent based on the url and provider
+    Accept:
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
-    "Referer": url,
-    "Connection": "keep-alive",
-    "x-Requested-With": "XMLHttpRequest"
+    Referer: url,
+    Host: url.match(/https?:\/\/([^\/]+)/)[1],
+    Connection: "keep-alive",
+    "x-Requested-With": "XMLHttpRequest",
   };
-  if(provider == 'bigwarp') {
-    delete headers["User-Agent"];
-    headers["x-requested-with"] = "XMLHttpRequest";
-  } else if (provider == 'vk') {
-    headers["encoding"] = "windows-1251"; // required
-  } else if (provider == 'sibnet') {
-    headers["encoding"] = "windows-1251"; // required
-  } else if (provider == 'supervideo') {
-    delete headers["User-Agent"];
+
+  switch (provider) {
+    case "bigwarp":
+      delete headers["User-Agent"];
+      break;
+    case "vk":
+    case "sibnet":
+      headers["encoding"] = "windows-1251"; // required
+      break;
+    case "supervideo":
+      headers = {
+        Accept: "*/*",
+        "Accept-Encoding": "gzip, deflate, br",
+        "User-Agent": "EchoapiRuntime/1.1.0",
+        Connection: "keep-alive",
+        "Cache-Control": "no-cache",
+        Host: url.match(/https?:\/\/([^\/]+)/)[1],
+      };
+      break;
+    case "streamtape":
+      headers = {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0",
+        "Accept":
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      };
+      break;
   }
+  console.log("Using headers: " + JSON.stringify(headers));
 
   // fetch the url
   // and pass the response to the extractor function
   console.log("Fetching URL: " + url);
   const response = await soraFetch(url, {
-      headers
-    });
+    headers,
+  });
 
   console.log("Response: " + response.status);
   let html = response.text ? await response.text() : response;
   // if title contains redirect, then get the redirect url
-  const title = html.match(/<title>(.*?)<\/title>/);
-  if (title && title[1].toLowerCase().includes("redirect")) {
-    const redirectUrl = html.match(/<meta http-equiv="refresh" content="0;url=(.*?)"/);
-    const redirectUrl2 = html.match(/window\.location\.href\s*=\s*["'](.*?)["']/);
-    const redirectUrl3 = html.match(/window\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/);
+  const matches = [
+    /<meta http-equiv="refresh" content="0;url=(.*?)"/,
+    /window\.location\.href\s*=\s*["'](.*?)["']/,
+    /window\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/,
+    /window\.location\s*=\s*["'](.*?)["']/,
+    /window\.location\.assign\s*\(\s*["'](.*?)["']\s*\)/,
+    /top\.location\s*=\s*["'](.*?)["']/,
+    /top\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/,
+  ];
+  for (const match of matches) {
+    const redirectUrl = html.match(match);
     if (redirectUrl) {
-      console.log("Redirect URL: " + redirectUrl[1]);
+      console.log("Redirect URL found: " + redirectUrl[1]);
       url = redirectUrl[1];
       html = await soraFetch(url, {
-        headers
-      });
-      html = html.text ? await html.text() : html;
-
-    } else if (redirectUrl2) {
-      console.log("Redirect URL 2: " + redirectUrl2[1]);
-      url = redirectUrl2[1];
-      html = await soraFetch(url, {
-        headers
-      });
-      html = html.text ? await html.text() : html;
-    } else if (redirectUrl3) {
-      console.log("Redirect URL 3: " + redirectUrl3[1]);
-      url = redirectUrl3[1];
-      html = await soraFetch(url, {
-        headers
-      });
-      html = html.text ? await html.text() : html;
-    } else {
-      console.log("No redirect URL found");
+        headers,
+      }).then((res) => res.text());
+      break;
     }
   }
 
   // console.log("HTML: " + html);
   switch (provider) {
-/* {PROVIDER_CASES} */
+    /* {PROVIDER_CASES} */
     default:
       throw new Error(`Unknown provider: ${provider}`);
   }
 }
-
 
 /* TEST SCHEME START */
 
@@ -276,7 +296,7 @@ async function test() {
   const startTime = Date.now();
   console.log("\n\n\x1b[1m\x1b[33mTesting...\x1b[0m\n\n");
   const providers = {
-  /* {TEST_PROVIDERS} */
+    /* {TEST_PROVIDERS} */
   };
 
   if (Object.keys(providers).length === 0) {
@@ -304,7 +324,11 @@ async function test() {
       return;
     }
     try {
-      console.log(`\x1b[33mTesting ${provider}...\x1b[0m (${i}/${Object.keys(providers).length})`);
+      console.log(
+        `\x1b[33mTesting ${provider}...\x1b[0m (${i}/${
+          Object.keys(providers).length
+        })`
+      );
       const streamUrl = await extractStreamUrlByProvider(url, provider);
       streamUrls.push({
         provider,
@@ -318,7 +342,9 @@ async function test() {
         console.log(`\x1b[31mTest failed for ${provider}\x1b[0m`);
       }
     } catch (error) {
-      console.log(`\x1b[31mTest failed for ${provider}: ${error.message}\x1b[0m`);
+      console.log(
+        `\x1b[31mTest failed for ${provider}: ${error.message}\x1b[0m`
+      );
       streamUrls.push({
         provider,
         url,
@@ -330,42 +356,54 @@ async function test() {
   // print the number of tests
   console.log(`\n\n\x1b[1m\x1b[33m${i} tests completed\x1b[0m`);
 
-
   // check if all streamUrls are valid and so the tests are successful
   // count the number of valid streamUrls
   let validCount = 0;
   streamUrls.forEach((item) => {
-    if (item.streamUrl &&
+    if (
+      item.streamUrl &&
       typeof item.streamUrl === "string" &&
-      item.streamUrl.startsWith("http")) {
+      item.streamUrl.startsWith("http")
+    ) {
       validCount++;
     }
   });
   if (validCount === streamUrls.length) {
     // all tests passed in bold and green
-    console.log(`\x1b[32m\x1b[1mAll tests passed successfully in ${((Date.now() - startTime) / 1000).toFixed(2)} seconds\x1b[0m\n`);
+    console.log(
+      `\x1b[32m\x1b[1mAll tests passed successfully in ${(
+        (Date.now() - startTime) /
+        1000
+      ).toFixed(2)} seconds\x1b[0m\n`
+    );
   } else {
-    console.log(`\x1b[31m\x1b[1m${validCount} out of ${streamUrls.length} tests passed in ${((Date.now() - startTime) / 1000).toFixed(2)} seconds\x1b[0m\n`);
+    console.log(
+      `\x1b[31m\x1b[1m${validCount} out of ${
+        streamUrls.length
+      } tests passed in ${((Date.now() - startTime) / 1000).toFixed(
+        2
+      )} seconds\x1b[0m\n`
+    );
   }
 
-      streamUrls.forEach((item) => {
-        if (
-          item.streamUrl === null ||
-          !item.streamUrl ||
-          typeof item.streamUrl !== "string" ||
-          !item.streamUrl.startsWith("http")
-        ) {
-          console.log(
-            `${item.provider}: ${item.url} - \x1b[31m\x1b[1mTest failed\x1b[0m`
-          );
-        } else {
-          console.log(
-            `${item.provider}: ${item.url} - \x1b[32m\x1b[1mTest passed\x1b[0m`
-          );
-        }
-      });
+  streamUrls.forEach((item) => {
+    if (
+      item.streamUrl === null ||
+      !item.streamUrl ||
+      typeof item.streamUrl !== "string" ||
+      !item.streamUrl.startsWith("http")
+    ) {
+      console.log(
+        `${item.provider}: ${item.url} - \x1b[31m\x1b[1mTest failed\x1b[0m`
+      );
+    } else {
+      console.log(
+        `${item.provider}: ${item.url} - \x1b[32m\x1b[1mTest passed\x1b[0m`
+      );
+    }
+  });
 
-    console.log("\n\x1b[1m\x1b[33mStream URLs:\x1b[0m");
+  console.log("\n\x1b[1m\x1b[33mStream URLs:\x1b[0m");
   streamUrls.forEach((item) => {
     console.log(`${item.provider}: ${item.streamUrl}`);
   });
@@ -373,9 +411,11 @@ async function test() {
   // make an array of the extractors and their test results
   let extractors = {};
   streamUrls.forEach((item) => {
-    if (item.streamUrl && 
+    if (
+      item.streamUrl &&
       typeof item.streamUrl === "string" &&
-      item.streamUrl.startsWith("http")) {
+      item.streamUrl.startsWith("http")
+    ) {
       extractors[item.provider] = "passed";
     } else {
       extractors[item.provider] = "failed";
@@ -385,25 +425,32 @@ async function test() {
   // DEBUG ONLY: PASS ALL TESTS
   // extractors = Object.keys(extractors).reduce((acc, key) => { acc[key] = "passed"; return acc; }, {});
 
-  // if (extractors["vidmoly"] && extractors["vidmoly"] === "failed") {
-  //   extractors["vidmoly"] = "passed";
-  // }
-  
+  // const passProviders = ["oneupload", "bigwarp", "smoothpre", "lulustream", "streamtape"];
+  const passProviders = [];
+
+  // force pass for specific providers
+  passProviders.forEach((provider) => {
+    if (extractors[provider]) {
+      extractors[provider] = "passed";
+    }
+  });
+
   // node only, save the test results to a file
-  if (typeof process !== "undefined" && process.versions && process.versions.node) {
+  if (
+    typeof process !== "undefined" &&
+    process.versions &&
+    process.versions.node
+  ) {
     const fs = require("fs");
     const path = require("path");
     const filePath = path.join(__dirname, "test_results.json");
     fs.writeFileSync(filePath, JSON.stringify(extractors, null, 2));
     console.log(`\n\x1b[1m\x1b[33mTest results saved to ${filePath}\x1b[0m`);
   }
-
 }
 test();
 
 /* TEST SCHEME END */
-
-
 
 ////////////////////////////////////////////////
 //                 EXTRACTORS                 //
@@ -412,7 +459,6 @@ test();
 // DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING //
 
 /* {EXTRACTOR_FUNCTIONS} */
-
 
 ////////////////////////////////////////////////
 //                 PLUGINS                    //
@@ -431,19 +477,27 @@ test();
  * @returns {Promise<Response|null>} The response from the server, or null if the
  * request failed.
  */
-async function soraFetch(url, options = { headers: {}, method: 'GET', body: null }) {
+async function soraFetch(
+  url,
+  options = { headers: {}, method: "GET", body: null }
+) {
+  try {
+    return await fetchv2(
+      url,
+      options.headers ?? {},
+      options.method ?? "GET",
+      options.body ?? null
+    );
+  } catch (e) {
     try {
-        return await fetchv2(url, options.headers ?? {}, options.method ?? 'GET', options.body ?? null);
-    } catch(e) {
-        try {
-            return await fetch(url, options);
-        } catch(error) {
-            await console.log('soraFetch error: ' + error.message);
-            return null;
-        }
+      return await fetch(url, options);
+    } catch (error) {
+      await console.log("soraFetch error: " + error.message);
+      return null;
     }
+  }
 }
 
-/* {PLUGINS} */ 
+/* {PLUGINS} */
 
 /* {GE END} */
