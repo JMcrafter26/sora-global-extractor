@@ -15,12 +15,12 @@
   "oneupload": "passed",
   "sendvid": "passed",
   "smoothpre": "passed",
-  "supervideo": "passed",
+  "supervideo": "failed",
   "uploadcx": "passed",
   "videospk": "passed",
   "streamup": "passed",
   "lulustream": "passed",
   "streamtape": "passed",
-  "streamhg": "passed",
-  "savefiles": "passed"
+  "packer": "passed",
+  "savefiles": "failed"
 }

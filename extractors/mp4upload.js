@@ -32,7 +32,6 @@ async function extractStreamUrl(url) {
  */
 
 async function mp4uploadExtractor(html, url = null) {
-    // src: "https://a4.mp4upload.com:183/d/xkx3b4etz3b4quuo66rbmyqtjjoivahfxp27f35pti45rzapbvj5xwb4wuqtlpewdz4dirfp/video.mp4"  
     const regex = /src:\s*"([^"]+)"/;
   const match = html.match(regex);
   if (match) {

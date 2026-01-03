@@ -3,8 +3,12 @@
 A comprehensive collection of JavaScript extractors for retrieving stream URLs from various hosting services. Designed specifically for integration with Sora iOS application modules.
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
-[![Version](https://api.jm26.net/b/Version-1.1.9-green)](./global-extractor/VERSION.json)
-[![Extractors](https://api.jm26.net/b/Extractors-24-orange)](#available-extractors)
+[![Version](https://api.jm26.net/b/Version-1.2.0-green)](./global-extractor/VERSION.json)
+[![Extractors](https://api.jm26.net/b/Extractors-24-orange)](#-available-extractors)
+
+![Module Lib Badge](https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/available/sora-module-library/cozy.svg)
+![JavaScript Badge](https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/built-with/javascript/cozy-minimal.svg)
+![Python Badge](https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/built-with/python/cozy-minimal.svg)
 
 > [!CAUTION]
 > This project is licensed **exclusively for use within the [Sora/Sulfur iOS app](https://github.com/cranci1/Sora) and it's modules** .
@@ -12,7 +16,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 > **🚫 Do not pay to use modules — if someone is charging you or showing you ads to be able to use it, it's a scam!** 💸
 
 <div align="center">
- <a href="https://github.com/cranci1/Sora"><kbd> <br> <strong>Get the Sora App</strong> <br> </kbd></a>
+ <a href="https://sora.jm26.net"><kbd> <br> <strong>Get the Sora App</strong> <br> </kbd></a>
 </div>
 
 ## 📋 Table of Contents
@@ -53,7 +57,6 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 - 🛡️ **Error Handling**: Robust error management and fallback options
 - 📱 **Sora Integration**: Seamless integration with Sora iOS app
 - 🔧 **Direct URL Support**: Handle direct video links alongside extractors
-
 
 ## 🚀 Quick Start
 
@@ -105,6 +108,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 | [📼 StreamTape](./extractors/streamtape.js) | [ShadeOfChaos](https://github.com/ShadeOfChaos) |
 | [🏠 StreamHG](./extractors/streamhg.js) | [Cufiy](https://github.com/JMcrafter26) |
 | [💾 SaveFiles](./extractors/savefiles.js) | [Cufiy](https://github.com/JMcrafter26) |
+| [📦 Packer](./extractors/packer.js) | [Cufiy](https://github.com/JMcrafter26) |
 
 > **Note**: All extractors are asynchronous. You can find out more about the individual extractors in their respective files.
 
@@ -139,20 +143,20 @@ The global extractor supports the following extractors:
 | oneupload | ✅ |
 | sendvid | ✅ |
 | smoothpre | ✅ |
-| supervideo | ✅ |
+| supervideo | ❌ |
 | uploadcx | ✅ |
 | videospk | ✅ |
 | streamup | ✅ |
 | lulustream | ✅ |
 | streamtape | ✅ |
-| streamhg | ✅ |
-| savefiles | ✅ |
+| packer | ✅ |
+| savefiles | ❌ |
 
-> **Last updated**: November 25, 2025
+> **Last updated**: January 03, 2026
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 91.67% (22/24 extractors passing)
+> **Success Rate**: 83.33% (20/24 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -293,7 +297,7 @@ The updater follows a structured process:
 
 **Sample Output:**
 
-```
+```bash
 🚀 SORA GLOBAL EXTRACTOR UPDATER v1.0.0
 ============================================================
 ✅ Latest Version: 1.1.0
@@ -307,7 +311,7 @@ The updater follows a structured process:
 
 ### Project Structure
 
-```
+```structure
 sora-streamurl-extractors/
 ├── extractors/           # Individual extractor implementations
 ├── global-extractor/     # Global extractor build system
@@ -333,6 +337,7 @@ node global_extractor_test.js
 ```
 
 ### Contributing
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/new-extractor`
 3. Add your extractor to the `extractors/` folder
@@ -346,6 +351,7 @@ For detailed information about changes, improvements, and version history, see o
 
 **Recent Updates:**
 
+- **v1.2.0** (January 3, 2026): Added SaveFiles extractor, improved multi-extractor error handling
 - **v1.1.9** (November 24, 2025): Added StreamHG and SaveFiles extractors, improved multi-extractor reliability
 - **v1.1.8** (November 12, 2025): Fixed VK extractor, improved error handling
 - **v1.1.7** (November 5, 2025): Added StreamTape extractor
@@ -360,14 +366,14 @@ For detailed information about changes, improvements, and version history, see o
 
 ## TODO
 
-- [ ] Use [Better multi return array](https://sora.jm26.net/docs/modules/module-functions/extractStreamUrl.html#multi-server-selector-recommended)
+- [x] Use [Better multi return array](https://sora.jm26.net/docs/modules/module-functions/extractStreamUrl.html#multi-server-selector-recommended)
 - [ ] Allow extractor to return multiple formats streams
 - [ ] Subtitle support
 - [ ] Add more extractors
 
 ## 📄 License
 
-This project is licensed under a **Custom License** that restricts usage to the **Sora/Sulfur iOS application** ecosystem only. 
+This project is licensed under a **Custom License** that restricts usage to the **Sora/Sulfur iOS application** ecosystem only.
 
 **Key Points:**
 
@@ -384,6 +390,3 @@ This project is licensed under a **Custom License** that restricts usage to the 
 [🌐 Sora Modules Library](https://sora.jm26.net/library) • [📚 Documentation](https://sora.jm26.net/docs) • [📝 Changelog](./CHANGELOG.md) • [🐛 Report Issues](https://github.com/JMcrafter26/sora-streamurl-extractors/issues)
 
 </div>
-
-
-

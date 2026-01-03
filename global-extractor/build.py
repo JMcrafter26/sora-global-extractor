@@ -417,6 +417,15 @@ def test():
         badge_pattern = r'\[!\[Extractors\]\(https://api\.jm26\.net/b/Extractors-\d+-orange\)\]\(#available-extractors\)'
         badge_replacement = f"[![Extractors](https://api.jm26.net/b/Extractors-{len(test_results)}-orange)](#available-extractors)"
         new_table_content = re.sub(badge_pattern, badge_replacement, new_table_content)
+
+        # update the [![Version](https://api.jm26.net/b/Version-1.1.9-green)](./global-extractor/VERSION.json) badge in README.md
+        version_pattern = r'\[!\[Version\]\(https://api\.jm26\.net/b/Version-[\d\.]+-green\)\]\(./global-extractor/VERSION\.json\)'
+        with open(os.path.join(script_dir, '..', 'global-extractor', 'VERSION.json'), 'r', encoding='utf-8') as version_file:
+            version_data = json.load(version_file)
+            version = version_data.get("extractor", "1.0.0")
+        version_replacement = f"[![Version](https://api.jm26.net/b/Version-{version}-green)](./global-extractor/VERSION.json)"
+        new_table_content = re.sub(version_pattern, version_replacement, new_table_content)
+
     
         # write the file
         with open(os.path.join(script_dir, '..', 'README.md'), 'w', encoding='utf-8') as f:

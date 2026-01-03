@@ -67,6 +67,10 @@ function globalExtractor(providers) {
   for (const [url, provider] of Object.entries(providers)) {
     try {
       const streamUrl = extractStreamUrlByProvider(url, provider);
+      // check if streamUrl is an object with streamUrl property
+      if (streamUrl && typeof streamUrl === "object" && !Array.isArray(streamUrl) && streamUrl.streamUrl) {
+        return streamUrl.streamUrl;
+      }
       // check if streamUrl is not null, a string, and starts with http or https
       if (
         streamUrl &&
@@ -95,16 +99,30 @@ async function multiExtractor(providers) {
   /* this scheme should be returned as a JSON object
   {
   "streams": [
-    "FileMoon",
-    "https://filemoon.example/stream1.m3u8",
-    "StreamWish",
-    "https://streamwish.example/stream2.m3u8",
-    "Okru",
-    "https://okru.example/stream3.m3u8",
-    "MP4",
-    "https://mp4upload.example/stream4.mp4",
-    "Default",
-    "https://default.example/stream5.m3u8"
+  {
+    "title": "FileMoon",
+    "streamUrl": "https://filemoon.example/stream1.m3u8",
+  },
+  {
+    "title": "StreamWish",
+    "streamUrl": "https://streamwish.example/stream2.m3u8",
+  },
+  {
+    "title": "Okru",
+    "streamUrl": "https://okru.example/stream3.m3u8",
+    "headers": { // Optional headers for the stream
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+      "Referer": "https://okru.example/",
+    },
+  },
+  {
+    "title": "MP4",
+    "streamUrl": "https://mp4upload.example/stream4.mp4",
+  },
+  {
+    "title": "Default",
+    "streamUrl": "https://default.example/stream5.m3u8"
+  }
   ]
 }
   */
@@ -116,20 +134,21 @@ async function multiExtractor(providers) {
       // if provider starts with "direct-", then add the url to the streams array directly
       if (provider.startsWith("direct-")) {
         const directName = provider.slice(7); // remove "direct-" prefix
-        if (directName && directName.length > 0) {
-          streams.push(directName, url);
-        } else {
-          streams.push("Direct", url); // fallback to "Direct" if no name is provided
-        }
+        const title = (directName && directName.length > 0) ? directName : "Direct";
+        streams.push({
+          title: title,
+          streamUrl: url
+        });
         continue; // skip to the next provider
       }
       if (provider.startsWith("direct")) {
         provider = provider.slice(7); // remove "direct-" prefix
-        if (provider && provider.length > 0) {
-          streams.push(provider, url);
-        } else {
-          streams.push("Direct", url); // fallback to "Direct" if no name is provided
-        }
+        const title = (provider && provider.length > 0) ? provider : "Direct";
+        streams.push({
+          title: title,
+          streamUrl: url
+        });
+        continue; // skip to the next provider
       }
 
       let customName = null; // to store the custom name if provided
@@ -146,15 +165,24 @@ async function multiExtractor(providers) {
         console.log(`Skipping ${provider} as it has already 3 streams`);
         continue;
       }
-      let streamUrl = await extractStreamUrlByProvider(url, provider);
+      let result = await extractStreamUrlByProvider(url, provider);
+      let streamUrl = null;
+      let headers = null;
 
-      if (streamUrl && Array.isArray(streamUrl)) {
-        const httpStream = streamUrl.find((url) => url.startsWith("http"));
+      // Check if result is an object with streamUrl and optional headers
+      if (result && typeof result === "object" && !Array.isArray(result) && result.streamUrl) {
+        streamUrl = result.streamUrl;
+        headers = result.headers || null;
+      } else if (result && Array.isArray(result)) {
+        const httpStream = result.find((url) => url.startsWith("http"));
         if (httpStream) {
           streamUrl = httpStream;
         }
+      } else if (result && typeof result === "string") {
+        streamUrl = result;
       }
-      // check if provider is already in streams, if it is, add a number to it
+
+      // check if streamUrl is valid
       if (
         !streamUrl ||
         typeof streamUrl !== "string" ||
@@ -168,22 +196,29 @@ async function multiExtractor(providers) {
         provider = customName;
       }
 
+      let title;
       if (providersCount[provider]) {
         providersCount[provider]++;
-        streams.push(
-          provider.charAt(0).toUpperCase() +
+        title = provider.charAt(0).toUpperCase() +
             provider.slice(1) +
             "-" +
-            (providersCount[provider] - 1), // add a number to the provider name
-          streamUrl
-        );
+            (providersCount[provider] - 1); // add a number to the provider name
       } else {
         providersCount[provider] = 1;
-        streams.push(
-          provider.charAt(0).toUpperCase() + provider.slice(1),
-          streamUrl
-        );
+        title = provider.charAt(0).toUpperCase() + provider.slice(1);
       }
+      
+      const streamObject = {
+        title: title,
+        streamUrl: streamUrl
+      };
+      
+      // Add headers if they exist
+      if (headers && typeof headers === "object" && Object.keys(headers).length > 0) {
+        streamObject.headers = headers;
+      }
+      
+      streams.push(streamObject);
     } catch (error) {
       // Ignore the error and try the next provider
     }
@@ -209,12 +244,11 @@ async function extractStreamUrlByProvider(url, provider) {
   ];
   let headers = {
     "User-Agent": uas[(url.length + provider.length) % uas.length], // use a different user agent based on the url and provider
-    Accept:
+    "Accept":
       "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
-    Referer: url,
-    Host: url.match(/https?:\/\/([^\/]+)/)[1],
-    Connection: "keep-alive",
+    "Referer": url,
+    "Connection": "keep-alive",
     "x-Requested-With": "XMLHttpRequest",
   };
 
@@ -227,14 +261,15 @@ async function extractStreamUrlByProvider(url, provider) {
       headers["encoding"] = "windows-1251"; // required
       break;
     case "supervideo":
-      headers = {
-        Accept: "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "User-Agent": "EchoapiRuntime/1.1.0",
-        Connection: "keep-alive",
-        "Cache-Control": "no-cache",
-        Host: url.match(/https?:\/\/([^\/]+)/)[1],
-      };
+    case "savefiles":
+        headers = {
+                "Accept": "*/*",
+                "Accept-Encoding": "gzip, deflate, br",
+                "User-Agent": "EchoapiRuntime/1.1.0",
+                "Connection": "keep-alive",
+                "Cache-Control": "no-cache",
+                "Host": url.match(/https?:\/\/([^\/]+)/)[1],
+            };
       break;
     case "streamtape":
       headers = {
@@ -257,24 +292,29 @@ async function extractStreamUrlByProvider(url, provider) {
   console.log("Response: " + response.status);
   let html = response.text ? await response.text() : response;
   // if title contains redirect, then get the redirect url
-  const matches = [
-    /<meta http-equiv="refresh" content="0;url=(.*?)"/,
-    /window\.location\.href\s*=\s*["'](.*?)["']/,
-    /window\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/,
-    /window\.location\s*=\s*["'](.*?)["']/,
-    /window\.location\.assign\s*\(\s*["'](.*?)["']\s*\)/,
-    /top\.location\s*=\s*["'](.*?)["']/,
-    /top\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/,
-  ];
-  for (const match of matches) {
-    const redirectUrl = html.match(match);
-    if (redirectUrl) {
-      console.log("Redirect URL found: " + redirectUrl[1]);
-      url = redirectUrl[1];
-      html = await soraFetch(url, {
-        headers,
-      }).then((res) => res.text());
-      break;
+  const title = html.match(/<title>(.*?)<\/title>/);
+  if (title && title[1].toLowerCase().includes("redirect")) {
+    const matches = [
+      /<meta http-equiv="refresh" content="0;url=(.*?)"/,
+      /window\.location\.href\s*=\s*["'](.*?)["']/,
+      /window\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/,
+      /window\.location\s*=\s*["'](.*?)["']/,
+      /window\.location\.assign\s*\(\s*["'](.*?)["']\s*\)/,
+      /top\.location\s*=\s*["'](.*?)["']/,
+      /top\.location\.replace\s*\(\s*["'](.*?)["']\s*\)/,
+    ];
+    for (const match of matches) {
+      const redirectUrl = html.match(match);
+      if (redirectUrl && redirectUrl[1] && typeof redirectUrl[1] === "string" && redirectUrl[1].startsWith("http")) {
+        console.log("Redirect URL found: " + redirectUrl[1]);
+        url = redirectUrl[1];
+        headers['Referer'] = url;
+        headers['Host'] = url.match(/https?:\/\/([^\/]+)/)[1];
+        html = await soraFetch(url, {
+          headers,
+        }).then((res) => res.text());
+        break;
+      }
     }
   }
 
@@ -429,11 +469,11 @@ async function test() {
   // const passProviders = [];
 
   // force pass for specific providers
-  passProviders.forEach((provider) => {
-    if (extractors[provider]) {
-      extractors[provider] = "passed";
-    }
-  });
+  // passProviders.forEach((provider) => {
+  //   if (extractors[provider]) {
+  //     extractors[provider] = "passed";
+  //   }
+  // });
 
   // node only, save the test results to a file
   if (

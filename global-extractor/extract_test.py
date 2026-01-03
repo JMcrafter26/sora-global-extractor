@@ -53,3 +53,19 @@ if __name__ == "__main__":
         exit(0)
 
     print(f"Extracting using {extractor_name}...")
+
+    modulehost = os.path.join(os.path.dirname(__file__),  "modulehost.exe")
+    process_args = [modulehost, "--path", os.path.join(os.path.dirname(__file__), "..", "extractors", extractor_name + ".js"), "--function", "extractStreamUrl", "--param", url]
+    process = os.popen(' '.join(process_args))
+    output = process.read()
+    process.close()
+    try:
+        result = json.loads(output)
+        print("Extraction Result:")
+        print(json.dumps(result, indent=4))
+        print("\nExtraction completed.")
+        print("Stream URL:", result.get("data", 'N/A'))
+    except json.JSONDecodeError:
+        print("Failed to parse extraction result:")
+        print(output)
+    
