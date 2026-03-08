@@ -2,7 +2,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.2.0} */
+/* {VERSION: 1.2.1} */
 
 /**
  * @name global_extractor.js
@@ -10,8 +10,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2026-01-03 19:28:28
- * @version 1.2.0
+ * @date 2026-03-09 00:33:41
+ * @version 1.2.1
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -25,7 +25,7 @@ async function extractStreamUrl(url) {
     // Logic to populate providers
     // ...
     // Note: The higher up the provider is in the list, the higher the priority
-    // Available providers: bigwarp, doodstream, earnvids, filemoon, lulustream, megacloud, mp4upload, oneupload, packer, sendvid, sibnet, smoothpre, streamtape, streamup, uploadcx, uqload, videospk, vidmoly, vidoza, voe
+    // Available providers: bigwarp, doodstream, earnvids, filemoon, lulustream, megacloud, mp4upload, oneupload, packer, sendvid, sibnet, smoothpre, streamtape, uploadcx, uqload, videospk, vidoza, voe
 
     // E.g.
     // providers = {
@@ -422,13 +422,6 @@ async function extractStreamUrlByProvider(url, provider) {
          console.log("Error extracting stream URL from streamtape:", error);
          return null;
       }
-    case "streamup":
-      try {
-         return await streamupExtractor(html, url);
-      } catch (error) {
-         console.log("Error extracting stream URL from streamup:", error);
-         return null;
-      }
     case "uploadcx":
       try {
          return await uploadcxExtractor(html, url);
@@ -448,13 +441,6 @@ async function extractStreamUrlByProvider(url, provider) {
          return await videospkExtractor(html, url);
       } catch (error) {
          console.log("Error extracting stream URL from videospk:", error);
-         return null;
-      }
-    case "vidmoly":
-      try {
-         return await vidmolyExtractor(html, url);
-      } catch (error) {
-         console.log("Error extracting stream URL from vidmoly:", error);
          return null;
       }
     case "vidoza":
@@ -566,54 +552,156 @@ async function earnvidsExtractor(html, url = null) {
 
 /* --- filemoon --- */
 
-/* {REQUIRED PLUGINS: unbaser} */
 /**
  * @name filemoonExtractor
- * @author Cufiy - Inspired by Churly
+ * @author Cufiy
  */
 async function filemoonExtractor(html, url = null) {
-    // check if contains iframe, if does, extract the src and get the url
-    const regex = /<iframe[^>]+src="([^"]+)"[^>]*><\/iframe>/;
-    const match = html.match(regex);
-    if (match) {
-        console.log("Iframe URL: " + match[1]);
-        const iframeUrl = match[1];
-        const iframeResponse = await soraFetch(iframeUrl, {
-            headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                "Referer": url,
+    let uas = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
+        "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15",
+        "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+    ];
+    let headers = {
+        "User-Agent": uas[(url.length) % uas.length], // use a different user agent based on the url and provider
+        "Accept":
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Referer": url,
+        "Connection": "keep-alive",
+        "x-Requested-With": "XMLHttpRequest",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "same-origin",
+        "Sec-Fetch-User": "?1",
+    };
+    console.log("Initial URL: " + url);
+    // if urs does not contain /d/ or /e/, follow the redirect to get the correct url
+    if (url && !url.match(/\/[de]\//)) {
+        const response = await soraFetch(url, { headers, method: 'HEAD' });
+        // console log everything
+        // console.log("Response object from redirect fetch:" + JSON.stringify(response));
+        console.log("Redirected URL: " + response.url);
+        if (response.url) {
+            url = response.url;
+        } else {
+            console.log("Could not follow redirect to get video ID, using proxy failback");
+            const proxyResponseRaw = await soraFetch('https://passthrough-worker.simplepostrequest.workers.dev/noredirect?url=' + encodeURIComponent(url), { headers });
+            let proxyResponse;
+            try {
+                proxyResponse = await proxyResponseRaw.json() || await JSON.parse(proxyResponseRaw);
+                console.log("Proxy Response: " + JSON.stringify(proxyResponse));
+            } catch (error) {
+              console.log("Error parsing proxy response as JSON: " + error);
+                return null;
             }
-        });
-        console.log("Iframe Response: " + iframeResponse.status);
-        html = await iframeResponse.text();
+            console.log("Proxy Redirected URL: " + proxyResponse.location);
+            if (proxyResponse.location) {
+                url = proxyResponse.location;
+            } else {
+                console.log("No redirect URL found from proxy");
+                return null;
+            }
+        }
     }
-    // console.log("HTML: " + html);
-    // get /<script[^>]*>([\s\S]*?)<\/script>/gi
-    const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
-    const scripts = [];
-    let scriptMatch;
-    while ((scriptMatch = scriptRegex.exec(html)) !== null) {
-        scripts.push(scriptMatch[1]);
-    }
-    // get the script with eval and m3u8
-    const evalRegex = /eval\((.*?)\)/;
-    const m3u8Regex = /m3u8/;
-    // console.log("Scripts: " + scripts);
-    const evalScript = scripts.find(script => evalRegex.test(script) && m3u8Regex.test(script));
-    if (!evalScript) {
-        console.log("No eval script found");
+    // get id from url, e.g. https://filemoon.to/d/xxx or https://filemoon.to/e/xxx
+    const idMatch = url ? url.match(/\/[de]\/([a-zA-Z0-9]+)/) : null;
+    const videoId = idMatch ? idMatch[1] : null;
+    console.log("Extracted video ID: " + videoId);
+    if (!videoId) {
+        throw new Error("No video ID found in URL");
+        console.log("No video ID found in URL");
         return null;
     }
-    const unpackedScript = unpack(evalScript);
-    // get the m3u8 url
-    const m3u8Regex2 = /https?:\/\/[^\s]+master\.m3u8[^\s]*?(\?[^"]*)?/;
-    const m3u8Match = unpackedScript.match(m3u8Regex2);
-    if (m3u8Match) {
-        return m3u8Match[0];
-    } else {
-        console.log("No M3U8 URL found");
+    const apiUrl = `https://filemoon.to/api/videos/${videoId}/playback`;;
+    try {
+        const response = await soraFetch(apiUrl, { headers });
+        const json = await response.json();
+        const decryptor = new FileMoonDecryptor(json);
+        const decrypted = await decryptor.decrypt();
+        // Check for sources
+        if (decrypted && decrypted.sources) {
+            // Find the first source with a valid URL
+            for (const source of decrypted.sources) {
+                if (source.url) {
+                    console.log("Found source URL: " + source.url);
+                    return source.url;
+                }
+            }
+        }
+        console.log("No sources found in decrypted data");
         return null;
+    } catch (error) {
+        console.log("filemoon API fetch error: " + error);
+        return null;
+    }
+}
+
+class FileMoonDecryptor {
+    constructor(data) { this.d = data.playback; }
+    
+    // Base64url decode to byte array
+    b64d(s) {
+        const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+        const decoded = atob(b64);
+        const bytes = new Uint8Array(decoded.length);
+        for (let i = 0; i < decoded.length; i++) {
+            bytes[i] = decoded.charCodeAt(i);
+        }
+        return bytes;
+    }
+    
+    // Concatenate Uint8Arrays
+    concatBytes(...arrays) {
+        const totalLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
+        const result = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const arr of arrays) {
+            result.set(arr, offset);
+            offset += arr.length;
+        }
+        return result;
+    }
+    
+    async decrypt() {
+        console.log('Analyzing encryption...');
+        
+        try {
+            // Call PHP backend for decryption
+            // Please note: This is a workaround since the decryption logic is complex and may rely on environment-specific features.
+            // This endpoint is open-sourced and can be self-hosted if needed, just take a look at the `decryptAESGCM.js` file in this folder.
+            const phpEndpoint = 'https://api.jm26.net/decryptAESGCM/';
+            
+            const response = await soraFetch(phpEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    key_parts: this.d.key_parts,
+                    payload: this.d.payload,
+                    iv: this.d.iv
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Decryption failed on server');
+            }
+            
+            console.log('\n✅ Decrypted using PHP backend');
+            console.log('Parsed JSON structure:');
+            console.log(JSON.stringify(result.data, null, 2));
+            
+            return result.data;
+        } catch(e) {
+            console.log('❌ Decryption failed:', e.message);
+            throw e;
+        }
     }
 }
 
@@ -1145,32 +1233,6 @@ async function streamtapeExtractor(html, url) {
 }
 
 
-/* --- streamup --- */
-
-/**
- * @name StreamUp Extractor
- * @author Cufiy
- */
-async function streamupExtractor(data, url = null) {
-    // if url ends with /, remove it
-    if (url.endsWith("/")) {
-        url = url.slice(0, -1);
-    }
-    // split the url by / and get the last part
-    const urlParts = url.split("/");
-    const videoId = urlParts[urlParts.length - 1];
-    const apiUrl = `https://strmup.to/ajax/stream?filecode=${videoId}`;
-    const response = await soraFetch(apiUrl);
-    const jsonData = await response.json();
-    if (jsonData && jsonData.streaming_url) {
-        return jsonData.streaming_url;
-    } else {
-        console.log("No streaming URL found in the response.");
-        return null;
-    }
-}
-
-
 /* --- uploadcx --- */
 
 /**
@@ -1216,46 +1278,6 @@ async function videospkExtractor(data, url = null) {
         return "https://videospk.xyz" + hlsLink;
 }
 
-
-
-/* --- vidmoly --- */
-
-/**
- * @name vidmolyExtractor
- * @author Ibro
- */
-async function vidmolyExtractor(html, url = null) {
-  const regexSub = /<option value="([^"]+)"[^>]*>\s*SUB - Omega\s*<\/option>/;
-  const regexFallback = /<option value="([^"]+)"[^>]*>\s*Omega\s*<\/option>/;
-  const fallback =
-    /<option value="([^"]+)"[^>]*>\s*SUB v2 - Omega\s*<\/option>/;
-  let match =
-    html.match(regexSub) || html.match(regexFallback) || html.match(fallback);
-  if (match) {
-    const decodedHtml = atob(match[1]); // Decode base64
-    const iframeMatch = decodedHtml.match(/<iframe\s+src="([^"]+)"/);
-    if (!iframeMatch) {
-      console.log("Vidmoly extractor: No iframe match found");
-      return null;
-    }
-    const streamUrl = iframeMatch[1].startsWith("//")
-      ? "https:" + iframeMatch[1]
-      : iframeMatch[1];
-    const responseTwo = await soraFetch(streamUrl);
-    const htmlTwo = await responseTwo.text();
-    const m3u8Match = htmlTwo.match(/sources:\s*\[\{file:"([^"]+\.m3u8)"/);
-    return m3u8Match ? m3u8Match[1] : null;
-  } else {
-    console.log("Vidmoly extractor: No match found, using fallback");
-    //  regex the sources: [{file:"this_is_the_link"}]
-    const sourcesRegex = /sources:\s*\[\{file:"(https?:\/\/[^"]+)"\}/;
-    const sourcesMatch = html.match(sourcesRegex);
-    let sourcesString = sourcesMatch
-      ? sourcesMatch[1].replace(/'/g, '"')
-      : null;
-    return sourcesString;
-  }
-}
 
 
 /* --- vidoza --- */

@@ -3,7 +3,7 @@
 A comprehensive collection of JavaScript extractors for retrieving stream URLs from various hosting services. Designed specifically for integration with Sora iOS application modules.
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
-[![Version](https://api.jm26.net/b/Version-1.2.0-green)](./global-extractor/VERSION.json)
+[![Version](https://api.jm26.net/b/Version-1.2.1-green)](./global-extractor/VERSION.json)
 [![Extractors](https://api.jm26.net/b/Extractors-24-orange)](#-available-extractors)
 
 ![Module Lib Badge](https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/available/sora-module-library/cozy.svg)
@@ -127,7 +127,7 @@ The global extractor supports the following extractors:
 <!-- EXTRACTORS_TABLE_START -->
 | Extractor | Test Passed |
 | -------- | ------- |
-| vidmoly | ✅ |
+| vidmoly | ❌ |
 | bigwarp | ✅ |
 | filemoon | ✅ |
 | doodstream | ✅ |
@@ -146,17 +146,17 @@ The global extractor supports the following extractors:
 | supervideo | ❌ |
 | uploadcx | ✅ |
 | videospk | ✅ |
-| streamup | ✅ |
+| streamup | ❌ |
 | lulustream | ✅ |
 | streamtape | ✅ |
 | packer | ✅ |
 | savefiles | ❌ |
 
-> **Last updated**: January 03, 2026
+> **Last updated**: March 09, 2026
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 83.33% (20/24 extractors passing)
+> **Success Rate**: 75.00% (18/24 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -351,6 +351,7 @@ For detailed information about changes, improvements, and version history, see o
 
 **Recent Updates:**
 
+- **v1.2.1** (March 9, 2026): Fixed FileMoon extractor issues
 - **v1.2.0** (January 3, 2026): Added SaveFiles extractor, improved multi-extractor error handling
 - **v1.1.9** (November 24, 2025): Added StreamHG and SaveFiles extractors, improved multi-extractor reliability
 - **v1.1.8** (November 12, 2025): Fixed VK extractor, improved error handling

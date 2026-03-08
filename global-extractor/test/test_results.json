@@ -1,5 +1,5 @@
 {
-  "vidmoly": "passed",
+  "vidmoly": "failed",
   "bigwarp": "passed",
   "filemoon": "passed",
   "doodstream": "passed",
@@ -18,7 +18,7 @@
   "supervideo": "failed",
   "uploadcx": "passed",
   "videospk": "passed",
-  "streamup": "passed",
+  "streamup": "failed",
   "lulustream": "passed",
   "streamtape": "passed",
   "packer": "passed",

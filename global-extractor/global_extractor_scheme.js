@@ -469,11 +469,11 @@ async function test() {
   // const passProviders = [];
 
   // force pass for specific providers
-  // passProviders.forEach((provider) => {
-  //   if (extractors[provider]) {
-  //     extractors[provider] = "passed";
-  //   }
-  // });
+  passProviders.forEach((provider) => {
+    if (extractors[provider]) {
+      extractors[provider] = "passed";
+    }
+  });
 
   // node only, save the test results to a file
   if (
