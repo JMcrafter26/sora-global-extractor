@@ -11,13 +11,7 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 ![Python Badge](https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/built-with/python/cozy-minimal.svg)
 
 > [!CAUTION]
-> This project is licensed **exclusively for use within the [Sora/Sulfur iOS app](https://github.com/cranci1/Sora) and it's modules** .
->
-> **🚫 Do not pay to use modules — if someone is charging you or showing you ads to be able to use it, it's a scam!** 💸
-
-<div align="center">
- <a href="https://sora.jm26.net"><kbd> <br> <strong>Get the Sora App</strong> <br> </kbd></a>
-</div>
+> This project is licensed **exclusively for use within the [Sora/Sulfur iOS app](https://github.com/cranci1/Sora) and it's modules**.
 
 ## 📋 Table of Contents
 
@@ -62,8 +56,6 @@ A comprehensive collection of JavaScript extractors for retrieving stream URLs f
 
 > [!Note]
 > This guide assumes you have a basic understanding of JavaScript and Sora module development.
->
-> If you are new to these concepts, consider [reading the Sora documentation](https://sora.jm26.net/docs) first.
 
 1. **Choose your integration method:**
    - Use the [Global Extractor](#-global-extractor) for multiple providers (recommended)
@@ -389,6 +381,6 @@ This project is licensed under a **Custom License** that restricts usage to the 
 
 **Made with ❤️ for the Sora Community**
 
-[🌐 Sora Modules Library](https://sora.jm26.net/library) • [📚 Documentation](https://sora.jm26.net/docs) • [📝 Changelog](./CHANGELOG.md) • [🐛 Report Issues](https://github.com/JMcrafter26/sora-streamurl-extractors/issues)
+ [📝 Changelog](./CHANGELOG.md) • [🐛 Report Issues](https://github.com/JMcrafter26/sora-streamurl-extractors/issues)
 
 </div>
