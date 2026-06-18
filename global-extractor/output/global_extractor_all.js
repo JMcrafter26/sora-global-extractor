@@ -3,7 +3,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.2.2} */
+/* {VERSION: 1.2.3} */
 
 /**
  * @name global_extractor.js
@@ -11,8 +11,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2026-06-18 02:27:54
- * @version 1.2.2
+ * @date 2026-06-18 04:11:49
+ * @version 1.2.3
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -303,19 +303,6 @@ async function extractStreamUrlByProvider(url, provider) {
 
   console.log("Response: " + response.status);
   let html = response.text ? await response.text() : response;
-
-  // node debug, save the html to a file in debug folder
-  if (typeof process !== "undefined" && process.versions && process.versions.node) {
-    const fs = require("fs");
-    const path = require("path");
-    const debugFolder = path.join(__dirname, "debug");
-    if (!fs.existsSync(debugFolder)) {
-      fs.mkdirSync(debugFolder);
-    }
-    const filePath = path.join(debugFolder, `${provider}_response.html`);
-    fs.writeFileSync(filePath, html);
-    console.log(`Response HTML saved to ${filePath}`);
-  }
 
 
   // if title contains redirect, then get the redirect url

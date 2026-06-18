@@ -3,7 +3,7 @@
 A comprehensive collection of JavaScript extractors for retrieving stream URLs from various hosting services. Designed specifically for integration with Sora iOS application modules.
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
-[![Version](https://api.jm26.net/b/Version-1.2.2-green)](./global-extractor/VERSION.json)
+[![Version](https://api.jm26.net/b/Version-1.2.3-green)](./global-extractor/VERSION.json)
 [![Extractors](https://api.jm26.net/b/Extractors-24-orange)](#-available-extractors)
 
 ![Module Lib Badge](https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/available/sora-module-library/cozy.svg)
