@@ -19,13 +19,16 @@ def build_combination(selected_functions):
 def guide():
     print("This script builds the global extractor with every combination of extractors.")
     functions = build.get_functions()
+    print(f"Available functions: {functions}")
 
     # Generate all non-empty subsets of functions
     all_combinations = []
+    print("Generating combinations... (" f"{2**len(functions) - 1} combinations expected)")
     for r in range(1, len(functions) + 1):
         for subset in itertools.combinations(functions, r):
             all_combinations.append(list(subset))
     
+    print(f"Generated {len(all_combinations)} combinations.")
     # remove duplicates, that are the same but in a different order
     all_combinations = [list(x) for x in set(tuple(x) for x in all_combinations)]
     # Sort the combinations to ensure consistent order

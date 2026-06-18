@@ -11,7 +11,7 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2026-03-09 00:32:23
+ * @date 2026-04-22 20:48:11
  * @version 1.2.1
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater

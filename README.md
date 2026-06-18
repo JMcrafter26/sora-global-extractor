@@ -127,36 +127,14 @@ The global extractor supports the following extractors:
 <!-- EXTRACTORS_TABLE_START -->
 | Extractor | Test Passed |
 | -------- | ------- |
-| vidmoly | ❌ |
-| bigwarp | ✅ |
 | filemoon | ✅ |
-| doodstream | ✅ |
 | voe | ✅ |
-| vidoza | ✅ |
-| mp4upload | ✅ |
-| megacloud | ✅ |
-| vk | ❌ |
-| uqload | ✅ |
-| sibnet | ✅ |
-| earnvids | ✅ |
-| dailymotion | ❌ |
-| oneupload | ✅ |
-| sendvid | ✅ |
-| smoothpre | ✅ |
-| supervideo | ❌ |
-| uploadcx | ✅ |
-| videospk | ✅ |
-| streamup | ❌ |
-| lulustream | ✅ |
-| streamtape | ✅ |
-| packer | ✅ |
-| savefiles | ❌ |
 
-> **Last updated**: March 09, 2026
+> **Last updated**: April 22, 2026
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 75.00% (18/24 extractors passing)
+> **Success Rate**: 100.00% (2/2 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage

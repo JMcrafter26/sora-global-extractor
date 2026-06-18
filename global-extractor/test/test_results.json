@@ -1,26 +1,4 @@
 {
-  "vidmoly": "failed",
-  "bigwarp": "passed",
   "filemoon": "passed",
-  "doodstream": "passed",
-  "voe": "passed",
-  "vidoza": "passed",
-  "mp4upload": "passed",
-  "megacloud": "passed",
-  "vk": "failed",
-  "uqload": "passed",
-  "sibnet": "passed",
-  "earnvids": "passed",
-  "dailymotion": "failed",
-  "oneupload": "passed",
-  "sendvid": "passed",
-  "smoothpre": "passed",
-  "supervideo": "failed",
-  "uploadcx": "passed",
-  "videospk": "passed",
-  "streamup": "failed",
-  "lulustream": "passed",
-  "streamtape": "passed",
-  "packer": "passed",
-  "savefiles": "failed"
+  "voe": "passed"
 }
