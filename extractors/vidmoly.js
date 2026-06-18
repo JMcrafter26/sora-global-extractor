@@ -1,8 +1,30 @@
 async function extractStreamUrl(url) {
   try {
-    const response = await soraFetch(url);
-    const html = (await response.text) ? response.text() : response;
+    let uas = [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
+      "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15",
+      "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+    ];
+    let headers = {
+      "User-Agent": uas[(url.length) % uas.length], // use a different user agent based on the url and provider
+      "Accept":
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
+      "Referer": url,
+      "Connection": "keep-alive",
+      "x-Requested-With": "XMLHttpRequest",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "same-origin",
+      "Sec-Fetch-User": "?1",
+    };
 
+    const response = await soraFetch(url, { headers });
+    const html = await response.text();
+    
     let streamUrl = null;
     try {
       streamUrl = await vidmolyExtractor(html);
@@ -52,34 +74,54 @@ async function vidmolyExtractor(html, url = null) {
       ? "https:" + iframeMatch[1]
       : iframeMatch[1];
 
-    const responseTwo = await soraFetch(streamUrl);
-    const htmlTwo = await responseTwo.text();
+    let uas = [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
+      "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15",
+      "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+    ];
+    let headers = {
+      "User-Agent": uas[(url.length) % uas.length], // use a different user agent based on the url and provider
+      "Accept":
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
+      "Referer": url,
+      "Connection": "keep-alive",
+      "x-Requested-With": "XMLHttpRequest",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "same-origin",
+      "Sec-Fetch-User": "?1",
+    };
 
-    const m3u8Match = htmlTwo.match(/sources:\s*\[\{file:"([^"]+\.m3u8)"/);
-    return m3u8Match ? m3u8Match[1] : null;
-  } else {
+    const response = await soraFetch(url, { headers });
+    html = await response.text();
+
+  } 
     console.log("Vidmoly extractor: No match found, using fallback");
     //  regex the sources: [{file:"this_is_the_link"}]
-    const sourcesRegex = /sources:\s*\[\{file:"(https?:\/\/[^"]+)"\}/;
+    const sourcesRegex = /sources:\s*\[\s*\{\s*file:\s*['"](https?:\/\/[^'"]+)['"]\s*\}/;
     const sourcesMatch = html.match(sourcesRegex);
     let sourcesString = sourcesMatch
       ? sourcesMatch[1].replace(/'/g, '"')
       : null;
 
     return sourcesString;
-  }
+  
 }
 
 /* SCHEME END */
 
 async function soraFetch(url, options = { headers: {}, method: 'GET', body: null }) {
+  try {
+    return await fetchv2(url, options.headers ?? {}, options.method ?? 'GET', options.body ?? null);
+  } catch (e) {
     try {
-        return await fetchv2(url, options.headers ?? {}, options.method ?? 'GET', options.body ?? null);
-    } catch(e) {
-        try {
-            return await fetch(url, options);
-        } catch(error) {
-            return null;
-        }
+      return await fetch(url, options);
+    } catch (error) {
+      return null;
     }
+  }
 }

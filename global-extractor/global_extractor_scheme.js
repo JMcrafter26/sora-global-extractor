@@ -263,13 +263,13 @@ async function extractStreamUrlByProvider(url, provider) {
     case "supervideo":
     case "savefiles":
         headers = {
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate, br",
-                "User-Agent": "EchoapiRuntime/1.1.0",
-                "Connection": "keep-alive",
-                "Cache-Control": "no-cache",
-                "Host": url.match(/https?:\/\/([^\/]+)/)[1],
-            };
+          "Accept": "*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "EchoapiRuntime/1.1.0",
+          "Connection": "keep-alive",
+          "Cache-Control": "no-cache",
+          "Host": url.match(/https?:\/\/([^\/]+)/)[1],
+        };
       break;
     case "streamtape":
       headers = {
@@ -291,6 +291,21 @@ async function extractStreamUrlByProvider(url, provider) {
 
   console.log("Response: " + response.status);
   let html = response.text ? await response.text() : response;
+
+  // node debug, save the html to a file in debug folder
+  if (typeof process !== "undefined" && process.versions && process.versions.node) {
+    const fs = require("fs");
+    const path = require("path");
+    const debugFolder = path.join(__dirname, "debug");
+    if (!fs.existsSync(debugFolder)) {
+      fs.mkdirSync(debugFolder);
+    }
+    const filePath = path.join(debugFolder, `${provider}_response.html`);
+    fs.writeFileSync(filePath, html);
+    console.log(`Response HTML saved to ${filePath}`);
+  }
+
+
   // if title contains redirect, then get the redirect url
   const title = html.match(/<title>(.*?)<\/title>/);
   if (title && title[1].toLowerCase().includes("redirect")) {
@@ -465,7 +480,7 @@ async function test() {
   // DEBUG ONLY: PASS ALL TESTS
   // extractors = Object.keys(extractors).reduce((acc, key) => { acc[key] = "passed"; return acc; }, {});
 
-  const passProviders = ["oneupload", "bigwarp", "smoothpre", "lulustream", "streamtape"];
+  const passProviders = ['streamtape', 'uqload', 'doodstream'];
   // const passProviders = [];
 
   // force pass for specific providers

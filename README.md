@@ -3,7 +3,7 @@
 A comprehensive collection of JavaScript extractors for retrieving stream URLs from various hosting services. Designed specifically for integration with Sora iOS application modules.
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
-[![Version](https://api.jm26.net/b/Version-1.2.1-green)](./global-extractor/VERSION.json)
+[![Version](https://api.jm26.net/b/Version-1.2.2-green)](./global-extractor/VERSION.json)
 [![Extractors](https://api.jm26.net/b/Extractors-24-orange)](#-available-extractors)
 
 ![Module Lib Badge](https://cdn.jsdelivr.net/gh/JMcrafter26/badges@main/src/assets/available/sora-module-library/cozy.svg)
@@ -127,14 +127,36 @@ The global extractor supports the following extractors:
 <!-- EXTRACTORS_TABLE_START -->
 | Extractor | Test Passed |
 | -------- | ------- |
-| filemoon | ✅ |
+| vidmoly | ✅ |
+| bigwarp | ❌ |
+| filemoon | ❌ |
+| doodstream | ✅ |
 | voe | ✅ |
+| vidoza | ✅ |
+| mp4upload | ✅ |
+| megacloud | ❌ |
+| vk | ❌ |
+| uqload | ✅ |
+| sibnet | ✅ |
+| earnvids | ✅ |
+| dailymotion | ❌ |
+| oneupload | ❌ |
+| sendvid | ✅ |
+| smoothpre | ❌ |
+| supervideo | ❌ |
+| uploadcx | ❌ |
+| videospk | ✅ |
+| streamup | ❌ |
+| lulustream | ❌ |
+| streamtape | ✅ |
+| packer | ✅ |
+| savefiles | ❌ |
 
-> **Last updated**: April 22, 2026
+> **Last updated**: June 18, 2026
 >
 > **Test Environment**: Automated CI/CD pipeline with real-world scenarios
 >
-> **Success Rate**: 100.00% (2/2 extractors passing)
+> **Success Rate**: 50.00% (12/24 extractors passing)
 <!-- EXTRACTORS_TABLE_END -->
 
 ### 💡 Basic Usage
@@ -329,6 +351,7 @@ For detailed information about changes, improvements, and version history, see o
 
 **Recent Updates:**
 
+- **v1.2.2** (June 18, 2026): Fix for DoodStream, VidMoly extractors
 - **v1.2.1** (March 9, 2026): Fixed FileMoon extractor issues
 - **v1.2.0** (January 3, 2026): Added SaveFiles extractor, improved multi-extractor error handling
 - **v1.1.9** (November 24, 2025): Added StreamHG and SaveFiles extractors, improved multi-extractor reliability

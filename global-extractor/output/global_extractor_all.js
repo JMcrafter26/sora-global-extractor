@@ -3,7 +3,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.2.1} */
+/* {VERSION: 1.2.2} */
 
 /**
  * @name global_extractor.js
@@ -11,8 +11,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2026-04-22 20:48:11
- * @version 1.2.1
+ * @date 2026-06-18 02:27:54
+ * @version 1.2.2
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -275,13 +275,13 @@ async function extractStreamUrlByProvider(url, provider) {
     case "supervideo":
     case "savefiles":
         headers = {
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate, br",
-                "User-Agent": "EchoapiRuntime/1.1.0",
-                "Connection": "keep-alive",
-                "Cache-Control": "no-cache",
-                "Host": url.match(/https?:\/\/([^\/]+)/)[1],
-            };
+          "Accept": "*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "EchoapiRuntime/1.1.0",
+          "Connection": "keep-alive",
+          "Cache-Control": "no-cache",
+          "Host": url.match(/https?:\/\/([^\/]+)/)[1],
+        };
       break;
     case "streamtape":
       headers = {
@@ -303,6 +303,21 @@ async function extractStreamUrlByProvider(url, provider) {
 
   console.log("Response: " + response.status);
   let html = response.text ? await response.text() : response;
+
+  // node debug, save the html to a file in debug folder
+  if (typeof process !== "undefined" && process.versions && process.versions.node) {
+    const fs = require("fs");
+    const path = require("path");
+    const debugFolder = path.join(__dirname, "debug");
+    if (!fs.existsSync(debugFolder)) {
+      fs.mkdirSync(debugFolder);
+    }
+    const filePath = path.join(debugFolder, `${provider}_response.html`);
+    fs.writeFileSync(filePath, html);
+    console.log(`Response HTML saved to ${filePath}`);
+  }
+
+
   // if title contains redirect, then get the redirect url
   const title = html.match(/<title>(.*?)<\/title>/);
   if (title && title[1].toLowerCase().includes("redirect")) {
@@ -635,29 +650,47 @@ async function dailymotionExtractor(html, url = null) {
 async function doodstreamExtractor(html, url = null) {
     console.log("DoodStream extractor called");
     console.log("DoodStream extractor URL: " + url);
-        const streamDomain = url.match(/https:\/\/(.*?)\//, url)[0].slice(8, -1);
-        const md5Path = html.match(/'\/pass_md5\/(.*?)',/, url)[0].slice(11, -2);
-        const token = md5Path.substring(md5Path.lastIndexOf("/") + 1);
-        const expiryTimestamp = new Date().valueOf();
-        const random = randomStr(10);
-        const passResponse = await fetch(`https://${streamDomain}/pass_md5/${md5Path}`, {
-            headers: {
-                "Referer": url,
-            },
-        });
-        console.log("DoodStream extractor response: " + passResponse.status);
-        const responseData = await passResponse.text();
-        const videoUrl = `${responseData}${random}?token=${token}&expiry=${expiryTimestamp}`;
-        console.log("DoodStream extractor video URL: " + videoUrl);
-        return videoUrl;
-}
-function randomStr(length) {
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    const match = html.match(/\/pass_md5\/([a-fA-F0-9\-]+)\/([a-zA-Z0-9]+)/);
+    if (!match) {
+        console.log('Could not find hash/token in the page.');
+        return;
     }
-    return result;
+    const hash = match[1];
+    const token = match[2];
+    console.log('🔑 Hash:', hash, 'Token:', token);
+    const hostUrl = url.match(/https?:\/\/[^\/]+/)[0];
+    // 2. Request the base video URL
+    const request = await soraFetch(`${hostUrl}/pass_md5/${hash}/${token}`);
+    if (!request) {
+        console.error('Failed to fetch the base video URL.');
+        return;
+    }
+    const data = await request.text();
+
+    if (!data) {
+        console.error('Failed to fetch the base video URL.');
+        return;
+    }
+    if (data.trim() === 'RELOAD') {
+        console.error('Token expired or invalid. Received RELOAD response.');
+        return;
+    }
+    let baseUrl = data.trim();
+    // If the server returns a relative path, make it absolute
+    if (!baseUrl.startsWith('http')) {
+        baseUrl = hostUrl + baseUrl;
+    }
+    console.log('🎬 Base video URL:', baseUrl);
+    // 3. Replicate makePlay() – random 10 chars + token + expiry
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let randomStr = '';
+    for (let i = 0; i < 10; i++) {
+        randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const suffix = randomStr + '?token=' + token + '&expiry=' + Date.now();
+    const finalUrl = baseUrl + suffix;
+    console.log('Final video URL:', finalUrl);
+    return finalUrl;
 }
 
 
@@ -1585,20 +1618,39 @@ async function vidmolyExtractor(html, url = null) {
     const streamUrl = iframeMatch[1].startsWith("//")
       ? "https:" + iframeMatch[1]
       : iframeMatch[1];
-    const responseTwo = await soraFetch(streamUrl);
-    const htmlTwo = await responseTwo.text();
-    const m3u8Match = htmlTwo.match(/sources:\s*\[\{file:"([^"]+\.m3u8)"/);
-    return m3u8Match ? m3u8Match[1] : null;
-  } else {
+    let uas = [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
+      "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15",
+      "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+    ];
+    let headers = {
+      "User-Agent": uas[(url.length) % uas.length], // use a different user agent based on the url and provider
+      "Accept":
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
+      "Referer": url,
+      "Connection": "keep-alive",
+      "x-Requested-With": "XMLHttpRequest",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "same-origin",
+      "Sec-Fetch-User": "?1",
+    };
+    const response = await soraFetch(url, { headers });
+    html = await response.text();
+  } 
     console.log("Vidmoly extractor: No match found, using fallback");
     //  regex the sources: [{file:"this_is_the_link"}]
-    const sourcesRegex = /sources:\s*\[\{file:"(https?:\/\/[^"]+)"\}/;
+    const sourcesRegex = /sources:\s*\[\s*\{\s*file:\s*['"](https?:\/\/[^'"]+)['"]\s*\}/;
     const sourcesMatch = html.match(sourcesRegex);
     let sourcesString = sourcesMatch
       ? sourcesMatch[1].replace(/'/g, '"')
       : null;
     return sourcesString;
-  }
+  
 }
 
 

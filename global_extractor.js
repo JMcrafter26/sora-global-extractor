@@ -2,7 +2,7 @@
 // EDITING THIS FILE COULD BREAK THE UPDATER AND CAUSE ISSUES WITH THE EXTRACTOR
 
 /* {GE START} */
-/* {VERSION: 1.2.1} */
+/* {VERSION: 1.2.2} */
 
 /**
  * @name global_extractor.js
@@ -10,8 +10,8 @@
  * @author Cufiy
  * @url https://github.com/JMcrafter26/sora-global-extractor
  * @license CUSTOM LICENSE - see https://github.com/JMcrafter26/sora-global-extractor/blob/main/LICENSE
- * @date 2026-04-22 20:51:39
- * @version 1.2.1
+ * @date 2026-06-18 02:28:19
+ * @version 1.2.2
  * @note This file was generated automatically.
  * The global extractor comes with an auto-updating feature, so you can always get the latest version. https://github.com/JMcrafter26/sora-global-extractor#-auto-updater
  */
@@ -25,7 +25,7 @@ async function extractStreamUrl(url) {
     // Logic to populate providers
     // ...
     // Note: The higher up the provider is in the list, the higher the priority
-    // Available providers: filemoon, voe
+    // Available providers: doodstream, earnvids, mp4upload, packer, sendvid, sibnet, streamtape, uqload, videospk, vidmoly, vidoza, voe
 
     // E.g.
     // providers = {
@@ -274,13 +274,13 @@ async function extractStreamUrlByProvider(url, provider) {
     case "supervideo":
     case "savefiles":
         headers = {
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate, br",
-                "User-Agent": "EchoapiRuntime/1.1.0",
-                "Connection": "keep-alive",
-                "Cache-Control": "no-cache",
-                "Host": url.match(/https?:\/\/([^\/]+)/)[1],
-            };
+          "Accept": "*/*",
+          "Accept-Encoding": "gzip, deflate, br",
+          "User-Agent": "EchoapiRuntime/1.1.0",
+          "Connection": "keep-alive",
+          "Cache-Control": "no-cache",
+          "Host": url.match(/https?:\/\/([^\/]+)/)[1],
+        };
       break;
     case "streamtape":
       headers = {
@@ -302,6 +302,21 @@ async function extractStreamUrlByProvider(url, provider) {
 
   console.log("Response: " + response.status);
   let html = response.text ? await response.text() : response;
+
+  // node debug, save the html to a file in debug folder
+  if (typeof process !== "undefined" && process.versions && process.versions.node) {
+    const fs = require("fs");
+    const path = require("path");
+    const debugFolder = path.join(__dirname, "debug");
+    if (!fs.existsSync(debugFolder)) {
+      fs.mkdirSync(debugFolder);
+    }
+    const filePath = path.join(debugFolder, `${provider}_response.html`);
+    fs.writeFileSync(filePath, html);
+    console.log(`Response HTML saved to ${filePath}`);
+  }
+
+
   // if title contains redirect, then get the redirect url
   const title = html.match(/<title>(.*?)<\/title>/);
   if (title && title[1].toLowerCase().includes("redirect")) {
@@ -331,11 +346,81 @@ async function extractStreamUrlByProvider(url, provider) {
 
   // console.log("HTML: " + html);
   switch (provider) {
-        case "filemoon":
+        case "doodstream":
       try {
-         return await filemoonExtractor(html, url);
+         return await doodstreamExtractor(html, url);
       } catch (error) {
-         console.log("Error extracting stream URL from filemoon:", error);
+         console.log("Error extracting stream URL from doodstream:", error);
+         return null;
+      }
+    case "earnvids":
+      try {
+         return await earnvidsExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from earnvids:", error);
+         return null;
+      }
+    case "mp4upload":
+      try {
+         return await mp4uploadExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from mp4upload:", error);
+         return null;
+      }
+    case "packer":
+      try {
+         return await packerExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from packer:", error);
+         return null;
+      }
+    case "sendvid":
+      try {
+         return await sendvidExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from sendvid:", error);
+         return null;
+      }
+    case "sibnet":
+      try {
+         return await sibnetExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from sibnet:", error);
+         return null;
+      }
+    case "streamtape":
+      try {
+         return await streamtapeExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from streamtape:", error);
+         return null;
+      }
+    case "uqload":
+      try {
+         return await uqloadExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from uqload:", error);
+         return null;
+      }
+    case "videospk":
+      try {
+         return await videospkExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from videospk:", error);
+         return null;
+      }
+    case "vidmoly":
+      try {
+         return await vidmolyExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from vidmoly:", error);
+         return null;
+      }
+    case "vidoza":
+      try {
+         return await vidozaExtractor(html, url);
+      } catch (error) {
+         console.log("Error extracting stream URL from vidoza:", error);
          return null;
       }
     case "voe":
@@ -360,162 +445,328 @@ async function extractStreamUrlByProvider(url, provider) {
 // DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING //
 
 
-/* --- filemoon --- */
+/* --- doodstream --- */
 
 /**
- * @name filemoonExtractor
+ * @name doodstreamExtractor
  * @author Cufiy
  */
-async function filemoonExtractor(html, url = null) {
+async function doodstreamExtractor(html, url = null) {
+    console.log("DoodStream extractor called");
+    console.log("DoodStream extractor URL: " + url);
+    const match = html.match(/\/pass_md5\/([a-fA-F0-9\-]+)\/([a-zA-Z0-9]+)/);
+    if (!match) {
+        console.log('Could not find hash/token in the page.');
+        return;
+    }
+    const hash = match[1];
+    const token = match[2];
+    console.log('🔑 Hash:', hash, 'Token:', token);
+    const hostUrl = url.match(/https?:\/\/[^\/]+/)[0];
+    // 2. Request the base video URL
+    const request = await soraFetch(`${hostUrl}/pass_md5/${hash}/${token}`);
+    if (!request) {
+        console.error('Failed to fetch the base video URL.');
+        return;
+    }
+    const data = await request.text();
+
+    if (!data) {
+        console.error('Failed to fetch the base video URL.');
+        return;
+    }
+    if (data.trim() === 'RELOAD') {
+        console.error('Token expired or invalid. Received RELOAD response.');
+        return;
+    }
+    let baseUrl = data.trim();
+    // If the server returns a relative path, make it absolute
+    if (!baseUrl.startsWith('http')) {
+        baseUrl = hostUrl + baseUrl;
+    }
+    console.log('🎬 Base video URL:', baseUrl);
+    // 3. Replicate makePlay() – random 10 chars + token + expiry
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let randomStr = '';
+    for (let i = 0; i < 10; i++) {
+        randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const suffix = randomStr + '?token=' + token + '&expiry=' + Date.now();
+    const finalUrl = baseUrl + suffix;
+    console.log('Final video URL:', finalUrl);
+    return finalUrl;
+}
+
+
+/* --- earnvids --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name earnvidsExtractor
+ * @author 50/50
+ */
+async function earnvidsExtractor(html, url = null) {
+    try {
+        const obfuscatedScript = html.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+        const unpackedScript = unpack(obfuscatedScript[1]);
+        const streamMatch = unpackedScript.match(/["'](\/stream\/[^"']+)["']/);
+        const hlsLink = streamMatch ? streamMatch[1] : null;
+        const baseUrl = url.match(/^(https?:\/\/[^/]+)/)[1];
+        console.log("HLS Link:" + baseUrl + hlsLink);
+        return baseUrl + hlsLink;
+    } catch (err) {
+        console.log(err);
+        return "https://files.catbox.moe/avolvc.mp4";
+    }
+}
+
+
+
+/* --- mp4upload --- */
+
+/**
+ * @name mp4uploadExtractor
+ * @author Cufiy
+ */
+async function mp4uploadExtractor(html, url = null) {
+    const regex = /src:\s*"([^"]+)"/;
+  const match = html.match(regex);
+  if (match) {
+    return match[1];
+  } else {
+    console.log("No match found for mp4upload extractor");
+    return null;
+  }
+}
+
+
+/* --- packer --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name packerExtractor
+ * @author 50/50
+ */
+async function packerExtractor(data, url = null) {
+    const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+    const unpackedScript = unpack(obfuscatedScript[1]);
+    const m3u8Match = unpackedScript.match(/"hls2"\s*:\s*"([^"]+)"/);
+    const m3u8Url = m3u8Match[1];
+    return m3u8Url;
+}
+
+
+
+/* --- sendvid --- */
+
+/**
+ * @name sendvidExtractor
+ * @author 50/50
+ */
+async function sendvidExtractor(data, url = null) {
+    const match = data.match(/var\s+video_source\s*=\s*"([^"]+)"/);
+    const videoUrl = match ? match[1] : null;
+    return videoUrl;
+}
+
+
+/* --- sibnet --- */
+
+/**
+ * @name sibnetExtractor
+ * @author scigward
+ */
+async function sibnetExtractor(html, embedUrl) {
+    try {
+        const videoMatch = html.match(
+            /player\.src\s*\(\s*\[\s*\{\s*src\s*:\s*["']([^"']+)["']/i
+        );
+        if (!videoMatch || !videoMatch[1]) {
+            throw new Error("Sibnet video source not found");
+        }
+        const videoPath = videoMatch[1];
+        const videoUrl = videoPath.startsWith("http")
+            ? videoPath
+            : `https://video.sibnet.ru${videoPath}`;
+        return videoUrl;
+    } catch (error) {
+        console.log("SibNet extractor error: " + error.message);
+        return null;
+    }
+}
+
+
+/* --- streamtape --- */
+
+/**
+ * 
+ * @name streamTapeExtractor
+ * @author ShadeOfChaos
+ */
+async function streamtapeExtractor(html, url) {
+    let promises = [];
+    const LINK_REGEX = /link['"]{1}\).innerHTML *= *['"]{1}([\s\S]*?)["'][\s\S]*?\(["']([\s\S]*?)["']([\s\S]*?);/g;
+    const CHANGES_REGEX = /([0-9]+)/g;
+    if(html == null) {
+        if(url == null) {
+            throw new Error('Provided incorrect parameters.');
+        }
+        const response = await soraFetch(url);
+        html = await response.text();
+    }
+    const matches = html.matchAll(LINK_REGEX);
+    for (const match of matches) {
+        let base = match?.[1];
+        let params = match?.[2];
+        const changeStr = match?.[3];
+        if(changeStr == null || changeStr == '') continue;
+        const changes = changeStr.match(CHANGES_REGEX);
+        for(let n of changes) {
+            params = params.substring(n);
+        }
+        while(base[0] == '/') {
+            base = base.substring(1);
+        }
+        const url = 'https://' + base + params;
+        promises.push(testUrl(url));
+    }
+    // Race for first success
+    return Promise.any(promises).then((value) => {
+        return value;
+    }).catch((error) => {
+        return null;
+    });
+    async function testUrl(url) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Timeout version prefered, but Sora does not support it currently
+                // var response = await soraFetch(url, { method: 'GET', signal: AbortSignal.timeout(2000) });
+                var response = await soraFetch(url);
+                if(response == null) throw new Error('Connection timed out.');
+            } catch(e) {
+                console.error('Rejected due to:', e.message);
+                return reject(null);
+            }
+            if(response?.ok && response?.status === 200) {
+                return resolve(url);
+            }
+            console.warn('Reject because of response:', response?.ok, response?.status);
+            return reject(null);
+        });
+    }
+}
+
+
+/* --- uqload --- */
+
+/**
+ * @name uqloadExtractor
+ * @author scigward
+ */
+async function uqloadExtractor(html, embedUrl) {
+    try {
+        const match = html.match(/sources:\s*\[\s*"([^"]+\.mp4)"\s*\]/);
+        const videoSrc = match ? match[1] : "";
+        return videoSrc;
+    } catch (error) {
+        console.log("uqloadExtractor error:", error.message);
+        return null;
+    }
+}
+
+
+/* --- videospk --- */
+
+/* {REQUIRED PLUGINS: unbaser} */
+/**
+ * @name videospkExtractor
+ * @author 50/50
+ */
+async function videospkExtractor(data, url = null) {
+        const obfuscatedScript = data.match(/<script[^>]*>\s*(eval\(function\(p,a,c,k,e,d.*?\)[\s\S]*?)<\/script>/);
+        const unpackedScript = unpack(obfuscatedScript[1]);
+        const streamMatch = unpackedScript.match(/["'](\/stream\/[^"']+)["']/);
+        const hlsLink = streamMatch ? streamMatch[1] : null;
+        return "https://videospk.xyz" + hlsLink;
+}
+
+
+
+/* --- vidmoly --- */
+
+/**
+ * @name vidmolyExtractor
+ * @author Ibro
+ */
+async function vidmolyExtractor(html, url = null) {
+  const regexSub = /<option value="([^"]+)"[^>]*>\s*SUB - Omega\s*<\/option>/;
+  const regexFallback = /<option value="([^"]+)"[^>]*>\s*Omega\s*<\/option>/;
+  const fallback =
+    /<option value="([^"]+)"[^>]*>\s*SUB v2 - Omega\s*<\/option>/;
+  let match =
+    html.match(regexSub) || html.match(regexFallback) || html.match(fallback);
+  if (match) {
+    const decodedHtml = atob(match[1]); // Decode base64
+    const iframeMatch = decodedHtml.match(/<iframe\s+src="([^"]+)"/);
+    if (!iframeMatch) {
+      console.log("Vidmoly extractor: No iframe match found");
+      return null;
+    }
+    const streamUrl = iframeMatch[1].startsWith("//")
+      ? "https:" + iframeMatch[1]
+      : iframeMatch[1];
     let uas = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
-        "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15",
-        "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Mobile/15E148 Safari/604.1",
+      "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15",
+      "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Mobile Safari/537.36",
     ];
     let headers = {
-        "User-Agent": uas[(url.length) % uas.length], // use a different user agent based on the url and provider
-        "Accept":
-            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Referer": url,
-        "Connection": "keep-alive",
-        "x-Requested-With": "XMLHttpRequest",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "same-origin",
-        "Sec-Fetch-User": "?1",
+      "User-Agent": uas[(url.length) % uas.length], // use a different user agent based on the url and provider
+      "Accept":
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
+      "Referer": url,
+      "Connection": "keep-alive",
+      "x-Requested-With": "XMLHttpRequest",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "same-origin",
+      "Sec-Fetch-User": "?1",
     };
-    console.log("Initial URL: " + url);
-    // if urs does not contain /d/ or /e/, follow the redirect to get the correct url
-    if (url && !url.match(/\/[de]\//)) {
-        const response = await soraFetch(url, { headers, method: 'HEAD' });
-        // console log everything
-        // console.log("Response object from redirect fetch:" + JSON.stringify(response));
-        console.log("Redirected URL: " + response.url);
-        if (response.url) {
-            url = response.url;
-        } else {
-            console.log("Could not follow redirect to get video ID, using proxy failback");
-            const proxyResponseRaw = await soraFetch('https://passthrough-worker.simplepostrequest.workers.dev/noredirect?url=' + encodeURIComponent(url), { headers });
-            let proxyResponse;
-            try {
-                proxyResponse = await proxyResponseRaw.json() || await JSON.parse(proxyResponseRaw);
-                console.log("Proxy Response: " + JSON.stringify(proxyResponse));
-            } catch (error) {
-              console.log("Error parsing proxy response as JSON: " + error);
-                return null;
-            }
-            console.log("Proxy Redirected URL: " + proxyResponse.location);
-            if (proxyResponse.location) {
-                url = proxyResponse.location;
-            } else {
-                console.log("No redirect URL found from proxy");
-                return null;
-            }
-        }
-    }
-    // get id from url, e.g. https://filemoon.to/d/xxx or https://filemoon.to/e/xxx
-    const idMatch = url ? url.match(/\/[de]\/([a-zA-Z0-9]+)/) : null;
-    const videoId = idMatch ? idMatch[1] : null;
-    console.log("Extracted video ID: " + videoId);
-    if (!videoId) {
-        throw new Error("No video ID found in URL");
-        console.log("No video ID found in URL");
-        return null;
-    }
-    const apiUrl = `https://filemoon.to/api/videos/${videoId}/playback`;;
-    try {
-        const response = await soraFetch(apiUrl, { headers });
-        const json = await response.json();
-        const decryptor = new FileMoonDecryptor(json);
-        const decrypted = await decryptor.decrypt();
-        // Check for sources
-        if (decrypted && decrypted.sources) {
-            // Find the first source with a valid URL
-            for (const source of decrypted.sources) {
-                if (source.url) {
-                    console.log("Found source URL: " + source.url);
-                    return source.url;
-                }
-            }
-        }
-        console.log("No sources found in decrypted data");
-        return null;
-    } catch (error) {
-        console.log("filemoon API fetch error: " + error);
-        return null;
-    }
-}
-
-class FileMoonDecryptor {
-    constructor(data) { this.d = data.playback; }
-    
-    // Base64url decode to byte array
-    b64d(s) {
-        const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
-        const decoded = atob(b64);
-        const bytes = new Uint8Array(decoded.length);
-        for (let i = 0; i < decoded.length; i++) {
-            bytes[i] = decoded.charCodeAt(i);
-        }
-        return bytes;
-    }
-    
-    // Concatenate Uint8Arrays
-    concatBytes(...arrays) {
-        const totalLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
-        const result = new Uint8Array(totalLength);
-        let offset = 0;
-        for (const arr of arrays) {
-            result.set(arr, offset);
-            offset += arr.length;
-        }
-        return result;
-    }
-    
-    async decrypt() {
-        console.log('Analyzing encryption...');
-        
-        try {
-            // Call PHP backend for decryption
-            // Please note: This is a workaround since the decryption logic is complex and may rely on environment-specific features.
-            // This endpoint is open-sourced and can be self-hosted if needed, just take a look at the `decryptAESGCM.js` file in this folder.
-            const phpEndpoint = 'https://api.jm26.net/decryptAESGCM/';
-            
-            const response = await soraFetch(phpEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    key_parts: this.d.key_parts,
-                    payload: this.d.payload,
-                    iv: this.d.iv
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (!result.success) {
-                throw new Error(result.error || 'Decryption failed on server');
-            }
-            
-            console.log('\n✅ Decrypted using PHP backend');
-            console.log('Parsed JSON structure:');
-            console.log(JSON.stringify(result.data, null, 2));
-            
-            return result.data;
-        } catch(e) {
-            console.log('❌ Decryption failed:', e.message);
-            throw e;
-        }
-    }
+    const response = await soraFetch(url, { headers });
+    html = await response.text();
+  } 
+    console.log("Vidmoly extractor: No match found, using fallback");
+    //  regex the sources: [{file:"this_is_the_link"}]
+    const sourcesRegex = /sources:\s*\[\s*\{\s*file:\s*['"](https?:\/\/[^'"]+)['"]\s*\}/;
+    const sourcesMatch = html.match(sourcesRegex);
+    let sourcesString = sourcesMatch
+      ? sourcesMatch[1].replace(/'/g, '"')
+      : null;
+    return sourcesString;
+  
 }
 
 
+/* --- vidoza --- */
+
+/**
+ * @name vidozaExtractor
+ * @author Cufiy
+ */
+async function vidozaExtractor(html, url = null) {
+  const regex = /<source src="([^"]+)" type='video\/mp4'>/;
+  const match = html.match(regex);
+  if (match) {
+    return match[1];
+  } else {
+    console.log("No match found for vidoza extractor");
+    return null;
+  }
+}
 
 
 /* --- voe --- */
@@ -654,6 +905,109 @@ async function soraFetch(
   }
 }
 
-/* {PLUGINS} */
+
+/***********************************************************
+ * UNPACKER MODULE
+ * Credit to GitHub user "mnsrulz" for Unpacker Node library
+ * https://github.com/mnsrulz/unpacker
+ ***********************************************************/
+class Unbaser {
+    constructor(base) {
+        this.ALPHABET = {
+            62: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            95: "' !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'",
+        };
+        this.dictionary = {};
+        this.base = base;
+        if (36 < base && base < 62) {
+            this.ALPHABET[base] = this.ALPHABET[base] ||
+                this.ALPHABET[62].substr(0, base);
+        }
+        if (2 <= base && base <= 36) {
+            this.unbase = (value) => parseInt(value, base);
+        }
+        else {
+            try {
+                [...this.ALPHABET[base]].forEach((cipher, index) => {
+                    this.dictionary[cipher] = index;
+                });
+            }
+            catch (er) {
+                throw Error("Unsupported base encoding.");
+            }
+            this.unbase = this._dictunbaser;
+        }
+    }
+    _dictunbaser(value) {
+        let ret = 0;
+        [...value].reverse().forEach((cipher, index) => {
+            ret = ret + ((Math.pow(this.base, index)) * this.dictionary[cipher]);
+        });
+        return ret;
+    }
+}
+
+function detectUnbaser(source) {
+    /* Detects whether `source` is P.A.C.K.E.R. coded. */
+    return source.replace(" ", "").startsWith("eval(function(p,a,c,k,e,");
+}
+
+function unpack(source) {
+    let { payload, symtab, radix, count } = _filterargs(source);
+    if (count != symtab.length) {
+        throw Error("Malformed p.a.c.k.e.r. symtab.");
+    }
+    let unbase;
+    try {
+        unbase = new Unbaser(radix);
+    }
+    catch (e) {
+        throw Error("Unknown p.a.c.k.e.r. encoding.");
+    }
+    function lookup(match) {
+        const word = match;
+        let word2;
+        if (radix == 1) {
+            word2 = symtab[parseInt(word)];
+        }
+        else {
+            word2 = symtab[unbase.unbase(word)];
+        }
+        return word2 || word;
+    }
+    source = payload.replace(/\b\w+\b/g, lookup);
+    return _replacestrings(source);
+    function _filterargs(source) {
+        const juicers = [
+            /}\('(.*)', *(\d+|\[\]), *(\d+), *'(.*)'\.split\('\|'\), *(\d+), *(.*)\)\)/,
+            /}\('(.*)', *(\d+|\[\]), *(\d+), *'(.*)'\.split\('\|'\)/,
+        ];
+        for (const juicer of juicers) {
+            const args = juicer.exec(source);
+            if (args) {
+                let a = args;
+                if (a[2] == "[]") {
+                }
+                try {
+                    return {
+                        payload: a[1],
+                        symtab: a[4].split("|"),
+                        radix: parseInt(a[2]),
+                        count: parseInt(a[3]),
+                    };
+                }
+                catch (ValueError) {
+                    throw Error("Corrupted p.a.c.k.e.r. data.");
+                }
+            }
+        }
+        throw Error("Could not make sense of p.a.c.k.e.r data (unexpected code structure)");
+    }
+    function _replacestrings(source) {
+        return source;
+    }
+}
+
+
 
 /* {GE END} */
