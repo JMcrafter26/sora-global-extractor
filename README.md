@@ -1,6 +1,6 @@
-# 🎬 Sora Stream URL Extractor Collection
+# 🎬 Video Stream Extractor Collection
 
-A comprehensive collection of JavaScript extractors for retrieving stream URLs from various hosting services. Designed specifically for integration with Sora iOS application modules.
+A comprehensive collection of JavaScript extractors for retrieving stream URLs from various hosting services.
 
 [![License](https://api.jm26.net/b/License-Custom-blue)](./LICENSE)
 [![Version](https://api.jm26.net/b/Version-1.2.3-green)](./global-extractor/VERSION.json)
